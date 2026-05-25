@@ -1,0 +1,221 @@
+'use client';
+
+import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAppDispatch, useAppSelector } from '@/hooks/redux';
+import { deleteAssignment, setSearchQuery, setFilterBy } from '@/store/slices/assignmentsSlice';
+import Header from '@/components/header';
+import { 
+  Search, 
+  SlidersHorizontal, 
+  MoreVertical, 
+  Plus, 
+  Calendar, 
+  Trash2, 
+  Eye, 
+  FileText 
+} from 'lucide-react';
+
+export default function AssignmentsPage() {
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+  const { items: assignments, searchQuery, filterBy } = useAppSelector((state) => state.assignments);
+  
+  // Track open state of dropdown action menus for each card ID
+  const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
+
+  // Filter & Search Logic
+  const filteredAssignments = assignments.filter((item) => {
+    const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase());
+    if (filterBy === 'All') return matchesSearch;
+    if (filterBy === 'Draft') return matchesSearch && item.status === 'draft';
+    if (filterBy === 'Completed') return matchesSearch && item.status === 'completed';
+    if (filterBy === 'Generating') return matchesSearch && item.status === 'generating';
+    return matchesSearch;
+  });
+
+  const toggleDropdown = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setActiveDropdownId(activeDropdownId === id ? null : id);
+  };
+
+  const handleView = (id: string) => {
+    setActiveDropdownId(null);
+    router.push(`/assignments/${id}`);
+  };
+
+  const handleDelete = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    dispatch(deleteAssignment(id));
+    setActiveDropdownId(null);
+  };
+
+  return (
+    <div className="flex-1 flex flex-col gap-6 md:my-4 select-none">
+      {/* Desktop Navigation Top bar */}
+      <Header breadcrumb="Assignments" />
+
+      {/* Main Container Card */}
+      <div className="flex-1 bg-white md:rounded-[28px] border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.015)] p-5 md:p-8 flex flex-col justify-start relative overflow-hidden h-[calc(100vh-160px)] md:h-[calc(100vh-130px)]">
+        
+        {/* View Details Header */}
+        <div className="flex items-center justify-between pb-6 border-b border-gray-50 shrink-0">
+          <div className="flex items-center gap-3">
+            <span className="w-3.5 h-3.5 rounded-full bg-emerald-500 ring-4 ring-emerald-50 animate-pulse"></span>
+            <div>
+              <h1 className="text-xl md:text-2xl font-black text-slate-800 tracking-tight leading-tight select-none">Assignments</h1>
+              <p className="text-[12px] md:text-sm text-gray-500 font-medium select-none mt-0.5">Manage and create assignments for your classes.</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Search and Filters panel */}
+        <div className="flex flex-col sm:flex-row gap-3 py-5 shrink-0 select-none">
+          {/* Filter dropdown */}
+          <div className="relative flex items-center">
+            <SlidersHorizontal className="absolute left-4 w-4 h-4 text-gray-400 pointer-events-none" />
+            <select
+              value={filterBy}
+              onChange={(e) => dispatch(setFilterBy(e.target.value))}
+              className="pl-11 pr-8 py-3.5 w-full sm:w-[160px] rounded-full border border-gray-100 bg-gray-50/50 hover:bg-gray-100/50 text-slate-600 text-sm font-semibold select-none cursor-pointer focus:outline-none appearance-none transition-all"
+            >
+              <option value="All">Filter By</option>
+              <option value="Completed">Completed</option>
+              <option value="Generating">Generating</option>
+              <option value="Draft">Draft</option>
+            </select>
+          </div>
+
+          {/* Search assignment bar */}
+          <div className="relative flex-1">
+            <Search className="absolute left-4.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+            <input
+              type="text"
+              placeholder="Search Assignment"
+              value={searchQuery}
+              onChange={(e) => dispatch(setSearchQuery(e.target.value))}
+              className="w-full pl-12 pr-6 py-3.5 rounded-full border border-gray-100 focus:border-gray-200 text-sm font-medium focus:outline-none transition-all placeholder:text-gray-400"
+            />
+          </div>
+        </div>
+
+        {/* Content Area */}
+        <div className="flex-1 overflow-y-auto relative pb-10">
+          {filteredAssignments.length === 0 ? (
+            /* Empty State matching Image 2 & 5 */
+            <div className="flex flex-col items-center justify-center py-12 md:py-16 text-center select-none animate-in fade-in duration-300">
+              {/* Custom SVG Illustration for Empty View */}
+              <div className="relative w-48 h-48 md:w-56 md:h-56 bg-gray-50/30 rounded-full flex items-center justify-center mb-6 border border-gray-100/30">
+                <div className="w-36 h-36 rounded-full bg-slate-50 flex items-center justify-center shadow-inner relative border border-gray-100/70">
+                  <FileText className="w-16 h-16 text-slate-400" />
+                  <div className="absolute top-8 right-8 w-12 h-12 bg-white rounded-full border border-gray-100 shadow-md flex items-center justify-center ring-4 ring-slate-50/40">
+                    <span className="text-2xl font-bold text-red-500">✕</span>
+                  </div>
+                  <span className="absolute bottom-6 left-6 text-xl animate-bounce">✨</span>
+                </div>
+              </div>
+              <h2 className="text-xl md:text-2xl font-black text-slate-800 tracking-tight leading-tight select-none">No assignments yet</h2>
+              <p className="text-gray-500 font-medium text-xs md:text-sm max-w-[420px] select-none mt-2 px-4 leading-relaxed">
+                Create your first assignment to start collecting and grading student submissions. You can set up rubrics, define marking criteria, and let AI assist with grading.
+              </p>
+              <button 
+                onClick={() => router.push('/assignments/create')}
+                className="mt-6 px-6 py-3 rounded-full bg-[#1E1E1E] text-white hover:bg-neutral-800 text-sm font-semibold tracking-wide shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer flex items-center gap-2"
+              >
+                <Plus className="w-4 h-4 text-orange-400" />
+                <span>Create Your First Assignment</span>
+              </button>
+            </div>
+          ) : (
+            /* Cards Grid matching Image 1 & 3 */
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pb-12 select-none">
+              {filteredAssignments.map((assignment) => (
+                <div 
+                  key={assignment._id}
+                  onClick={() => handleView(assignment._id)}
+                  className="bg-white border border-gray-100 hover:border-gray-200 rounded-[24px] p-6 hover:shadow-[0_8px_30px_rgb(0,0,0,0.02)] transition-all duration-200 cursor-pointer relative group flex flex-col justify-between h-[154px] select-none shadow-[0_4px_20px_rgb(0,0,0,0.005)]"
+                >
+                  {/* Card Header & 3-dot toggle */}
+                  <div className="flex items-start justify-between">
+                    <h3 className="text-lg font-black text-slate-800 tracking-tight leading-snug group-hover:text-orange-600 transition-colors select-none">
+                      {assignment.title}
+                    </h3>
+                    
+                    <div className="relative">
+                      <button 
+                        onClick={(e) => toggleDropdown(assignment._id, e)}
+                        className="p-2 -mr-2 rounded-full hover:bg-gray-50 text-gray-400 hover:text-slate-700 transition cursor-pointer"
+                      >
+                        <MoreVertical className="w-5 h-5" />
+                      </button>
+
+                      {/* Absolute popup action menu */}
+                      {activeDropdownId === assignment._id && (
+                        <div className="absolute right-0 mt-1 w-[160px] bg-white border border-gray-100/80 rounded-[18px] shadow-[0_10px_25px_rgba(0,0,0,0.08)] py-1.5 z-20 animate-slide-in-top">
+                          <button
+                            onClick={() => handleView(assignment._id)}
+                            className="w-full px-4 py-2.5 text-slate-700 text-xs font-semibold flex items-center gap-2 hover:bg-gray-50 cursor-pointer text-left"
+                          >
+                            <Eye className="w-4 h-4 text-gray-400" />
+                            <span>View Assignment</span>
+                          </button>
+                          <hr className="border-gray-50" />
+                          <button
+                            onClick={(e) => handleDelete(assignment._id, e)}
+                            className="w-full px-4 py-2.5 text-red-600 text-xs font-semibold flex items-center gap-2 hover:bg-red-50/50 cursor-pointer text-left"
+                          >
+                            <Trash2 className="w-4 h-4 text-red-400" />
+                            <span>Delete</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Card Details bar */}
+                  <div className="flex flex-wrap items-center justify-between text-xs font-bold text-slate-800 tracking-wide mt-4 border-t border-gray-50/70 pt-4 gap-2 select-none">
+                    <div className="flex items-center gap-1.5 text-[#1E1E1E]">
+                      <Calendar className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                      <span className="font-normal text-gray-500">Assigned on:</span>
+                      <span>{assignment.assignedOn}</span>
+                    </div>
+
+                    <div className="flex items-center gap-1.5 text-[#1E1E1E]">
+                      <span className="font-normal text-gray-500">Due:</span>
+                      <span>{assignment.dueDate}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Fading grid bottom mask */}
+        <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white to-transparent pointer-events-none z-10"></div>
+
+        {/* Floating Add Button for Mobile Quick FAB matching Image 2/3 */}
+        <button 
+          onClick={() => router.push('/assignments/create')}
+          className="md:hidden fixed bottom-24 right-6 w-12 h-12 rounded-full bg-white text-[#FF4F18] shadow-[0_6px_20px_rgba(0,0,0,0.15)] flex items-center justify-center border border-orange-100 hover:scale-105 active:scale-95 transition-all duration-200 cursor-pointer z-30 font-bold"
+        >
+          <span className="text-2xl font-semibold leading-none">+</span>
+        </button>
+
+        {/* Desktop Absolute bottom center "+ Create Assignment" pill button */}
+        {filteredAssignments.length > 0 && (
+          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 hidden md:block">
+            <button 
+              onClick={() => router.push('/assignments/create')}
+              className="px-6 py-3 rounded-full bg-[#1E1E1E] text-white hover:bg-neutral-800 text-sm font-semibold tracking-wide shadow-xl flex items-center gap-2 border border-neutral-700 hover:border-neutral-500 transition-all duration-200 cursor-pointer"
+            >
+              <Plus className="w-4 h-4 text-orange-400" />
+              <span>Create Assignment</span>
+            </button>
+          </div>
+        )}
+
+      </div>
+    </div>
+  );
+}
