@@ -1,9 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
-import { deleteAssignment, setSearchQuery, setFilterBy } from '@/redux/slices/assignmentSlice';
+import { deleteAssignment, setSearchQuery, setFilterBy, updateAssignment } from '@/redux/slices/assignmentSlice';
+import { setProgress } from '@/redux/slices/socketSlice';
+import { useSocket } from '@/app/providers';
 import Header from '@/components/header';
 import { 
   Search, 
@@ -13,16 +15,63 @@ import {
   Calendar, 
   Trash2, 
   Eye, 
-  FileText 
+  FileText,
+  Sparkles,
+  AlertCircle
 } from 'lucide-react';
 
 export default function AssignmentsPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const { items: assignments, searchQuery, filterBy } = useAppSelector((state) => state.assignment);
+  const socketProgress = useAppSelector((state) => state.socket.progress);
+  const socket = useSocket();
   
   // Track open state of dropdown action menus for each card ID
   const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
+
+  // Dynamic Socket.io room joins & progress listeners
+  useEffect(() => {
+    if (!socket) return;
+
+    const generating = assignments.filter(item => item.status === 'generating');
+    generating.forEach((assignment) => {
+      socket.emit('join-assignment', assignment._id);
+      console.log(`[Socket] Joined assignment room: ${assignment._id}`);
+    });
+
+    socket.on('generation-started', (data: { assignmentId: string }) => {
+      console.log(`[Socket] Generation started: ${data.assignmentId}`);
+      dispatch(setProgress(15));
+    });
+
+    socket.on('generation-progress', (data: { progress: number, assignmentId: string }) => {
+      console.log(`[Socket] Generation progress: ${data.progress}% for ${data.assignmentId}`);
+      dispatch(setProgress(data.progress));
+    });
+
+    socket.on('generation-completed', (data: { assignment: any, assignmentId: string }) => {
+      console.log(`[Socket] Generation completed successfully: ${data.assignmentId}`);
+      dispatch(setProgress(100));
+      dispatch(updateAssignment(data.assignment));
+    });
+
+    socket.on('generation-failed', (data: { error: string, assignmentId: string }) => {
+      console.error(`[Socket] Generation failed: ${data.assignmentId} error: ${data.error}`);
+      dispatch(setProgress(100));
+      const target = assignments.find(a => a._id === data.assignmentId);
+      if (target) {
+        dispatch(updateAssignment({ ...target, status: 'failed' }));
+      }
+    });
+
+    return () => {
+      socket.off('generation-started');
+      socket.off('generation-progress');
+      socket.off('generation-completed');
+      socket.off('generation-failed');
+    };
+  }, [socket, assignments, dispatch]);
 
   // Filter & Search Logic
   const filteredAssignments = assignments.filter((item) => {
@@ -196,17 +245,42 @@ export default function AssignmentsPage() {
                   </div>
 
                   {/* Card Details bar */}
-                  <div className="flex flex-wrap items-center justify-between text-xs font-bold text-[#1E1E1E] tracking-wide mt-4 border-t border-gray-50/70 pt-4 gap-2 select-none">
-                    <div className="flex items-center gap-1">
-                      <span className="font-normal text-gray-500">Assigned on :</span>
-                      <span>{assignment.assignedOn}</span>
-                    </div>
-
-                    {assignment.dueDate && (
-                      <div className="flex items-center gap-1">
-                        <span className="font-normal text-gray-500">Due :</span>
-                        <span>{assignment.dueDate}</span>
+                  <div className="flex flex-wrap items-center justify-between text-xs font-bold tracking-wide mt-4 border-t border-gray-50/70 pt-4 gap-2 select-none min-h-[40px]">
+                    {assignment.status === 'generating' ? (
+                      <div className="flex flex-col gap-1.5 w-full">
+                        <div className="flex items-center justify-between text-[11px] text-orange-600 font-extrabold">
+                          <span className="flex items-center gap-1 animate-pulse">
+                            <Sparkles className="w-3.5 h-3.5 fill-orange-500/10 text-orange-500" />
+                            <span>AI Generating Questions...</span>
+                          </span>
+                          <span>{socketProgress > 0 ? `${socketProgress}%` : 'Starting...'}</span>
+                        </div>
+                        <div className="w-full h-1.5 bg-orange-50 rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-gradient-to-r from-orange-500 via-orange-400 to-amber-500 transition-all duration-300 rounded-full"
+                            style={{ width: `${socketProgress > 0 ? socketProgress : 15}%` }}
+                          ></div>
+                        </div>
                       </div>
+                    ) : assignment.status === 'failed' ? (
+                      <div className="flex items-center gap-1.5 text-red-600 font-extrabold text-[11px]">
+                        <AlertCircle className="w-4 h-4 shrink-0" />
+                        <span>Generation Failed. Try deleting and re-creating.</span>
+                      </div>
+                    ) : (
+                      <>
+                        <div className="flex items-center gap-1 text-[#1E1E1E]">
+                          <span className="font-normal text-gray-500">Assigned on :</span>
+                          <span>{assignment.assignedOn}</span>
+                        </div>
+
+                        {assignment.dueDate && (
+                          <div className="flex items-center gap-1 text-[#1E1E1E]">
+                            <span className="font-normal text-gray-500">Due :</span>
+                            <span>{assignment.dueDate}</span>
+                          </div>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>

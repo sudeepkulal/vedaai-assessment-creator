@@ -14,16 +14,16 @@ export const initAssignmentWorker = () => {
       const io = getSocketIO();
 
       try {
-        // Step 1: Initialize status
-        io.to(assignmentId).emit('generation-progress', { progress: 10, status: 'generating' });
+        // Step 1: Trigger started event
+        io.to(assignmentId).emit('generation-started', { assignmentId });
         await new Promise((resolve) => setTimeout(resolve, 500));
 
-        // Step 2: Ingestion & Reference check
-        io.to(assignmentId).emit('generation-progress', { progress: 40, status: 'generating' });
+        // Step 2: Ingestion & Reference check progress
+        io.to(assignmentId).emit('generation-progress', { progress: 40, assignmentId });
         await new Promise((resolve) => setTimeout(resolve, 500));
 
-        // Step 3: Trigger Gemini API content generation
-        io.to(assignmentId).emit('generation-progress', { progress: 70, status: 'generating' });
+        // Step 3: Prompt crafting progress
+        io.to(assignmentId).emit('generation-progress', { progress: 70, assignmentId });
         
         const paper = await AIService.generateQuestions(
           title,
@@ -34,7 +34,7 @@ export const initAssignmentWorker = () => {
           instructions
         );
 
-        // Step 4: Flatten section questions list to fit model schema
+        // Step 4: Flatten section questions list
         const questionsList: any[] = [];
         paper.sections.forEach((section) => {
           section.questions.forEach((q) => {
@@ -43,7 +43,7 @@ export const initAssignmentWorker = () => {
               type: q.type,
               options: q.options,
               correctAnswer: q.correctAnswer,
-              rubric: q.rubric || `Evaluate answers based on sections instructions: ${section.instructions}`,
+              rubric: q.rubric || `Evaluate answers based on section instructions: ${section.instructions}`,
             });
           });
         });
@@ -62,10 +62,10 @@ export const initAssignmentWorker = () => {
           throw new Error(`Assignment not found: ${assignmentId}`);
         }
 
-        io.to(assignmentId).emit('generation-progress', { 
-          progress: 100, 
-          status: 'completed',
-          assignment: updatedAssignment
+        // Step 6: Trigger completed event
+        io.to(assignmentId).emit('generation-completed', { 
+          assignment: updatedAssignment,
+          assignmentId
         });
 
         console.log(`Assignment job successfully completed: ${assignmentId}`);
@@ -74,10 +74,10 @@ export const initAssignmentWorker = () => {
         
         await Assignment.findByIdAndUpdate(assignmentId, { status: 'failed' });
         
-        io.to(assignmentId).emit('generation-progress', { 
-          progress: 100, 
-          status: 'failed', 
-          error: error.message 
+        // Trigger failed event
+        io.to(assignmentId).emit('generation-failed', { 
+          error: error.message,
+          assignmentId
         });
 
         throw error;
