@@ -7,6 +7,11 @@ export const assignmentQueue = new Queue(ASSIGNMENT_QUEUE_NAME, {
   connection: redisConnection,
 });
 
+// Monitor Queue Errors for high-availability connections
+assignmentQueue.on('error', (err) => {
+  console.error('[Queue Error]: Assignment Queue encountered an error:', err);
+});
+
 export const addAssignmentJob = async (assignmentId: string, data: any) => {
   await assignmentQueue.add('generate', { assignmentId, ...data }, {
     attempts: 3,
