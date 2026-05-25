@@ -60,6 +60,7 @@ export default function CreateAssignmentPage() {
     register,
     control,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<AssignmentFormValues>({
     resolver: zodResolver(assignmentSchema),
@@ -243,6 +244,20 @@ export default function CreateAssignmentPage() {
                 errors.title ? 'border-red-400 focus:border-red-400' : 'border-gray-100 focus:border-gray-200'
               } text-sm font-medium focus:outline-none bg-gray-50/20 transition-all placeholder:text-gray-400`}
             />
+            {/* Title Suggestions Pills */}
+            <div className="flex flex-wrap items-center gap-2 mt-1 select-none">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Pills:</span>
+              {['Electricity Quiz', 'Biology Homework', 'Math Final', 'World War II Test'].map((t) => (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => setValue('title', t, { shouldValidate: true })}
+                  className="px-2.5 py-0.5 text-[11px] font-semibold text-slate-500 bg-gray-50/50 hover:bg-orange-50 hover:text-orange-600 border border-gray-100 hover:border-orange-100 rounded-full transition cursor-pointer"
+                >
+                  {t}
+                </button>
+              ))}
+            </div>
             {errors.title && (
               <span className="text-red-500 text-xs font-semibold pl-1 flex items-center gap-1">
                 <AlertCircle className="w-3 h-3" />
@@ -265,6 +280,20 @@ export default function CreateAssignmentPage() {
                 errors.topic ? 'border-red-400 focus:border-red-400' : 'border-gray-100 focus:border-gray-200'
               } text-sm font-medium focus:outline-none bg-gray-50/20 transition-all placeholder:text-gray-400`}
             />
+            {/* Topic Suggestions Pills */}
+            <div className="flex flex-wrap items-center gap-2 mt-1 select-none">
+              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Pills:</span>
+              {['Ohm\'s Law & Resistance', 'Cell Division & Mitosis', 'Quadratic Equations', 'French Revolution'].map((topic) => (
+                <button
+                  key={topic}
+                  type="button"
+                  onClick={() => setValue('topic', topic, { shouldValidate: true })}
+                  className="px-2.5 py-0.5 text-[11px] font-semibold text-slate-500 bg-gray-50/50 hover:bg-orange-50 hover:text-orange-600 border border-gray-100 hover:border-orange-100 rounded-full transition cursor-pointer"
+                >
+                  {topic}
+                </button>
+              ))}
+            </div>
             {errors.topic && (
               <span className="text-red-500 text-xs font-semibold pl-1 flex items-center gap-1">
                 <AlertCircle className="w-3 h-3" />

@@ -200,12 +200,12 @@ export default function AssignmentsPage() {
             </div>
           ) : (
             /* Cards Grid matching Image 1 & 3 */
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 pb-12 select-none">
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 pb-12 select-none">
               {filteredAssignments.map((assignment) => (
                 <div 
                   key={assignment._id}
                   onClick={() => handleView(assignment._id)}
-                  className="bg-white border border-gray-100 hover:border-gray-200 rounded-[24px] p-6 hover:shadow-[0_8px_30px_rgb(0,0,0,0.02)] transition-all duration-200 cursor-pointer relative group flex flex-col justify-between h-[154px] select-none shadow-[0_4px_20px_rgb(0,0,0,0.005)]"
+                  className="bg-white border border-gray-100 hover:border-gray-200 rounded-[24px] p-6 hover:shadow-[0_8px_30px_rgb(0,0,0,0.02)] transition-all duration-200 cursor-pointer relative group flex flex-col justify-between min-h-[160px] h-auto pb-5 select-none shadow-[0_4px_20px_rgb(0,0,0,0.005)]"
                 >
                   {/* Card Header & 3-dot toggle */}
                   <div className="flex items-start justify-between">
