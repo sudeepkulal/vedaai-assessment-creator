@@ -19,10 +19,12 @@ export default function Sidebar() {
   const activeTab = useAppSelector((state) => state.assignments.activeTab);
   const router = useRouter();
 
+  const assignmentsCount = useAppSelector((state) => state.assignments.items.length);
+
   const navItems = [
     { id: 'home', label: 'Home', icon: Home },
     { id: 'groups', label: 'My Groups', icon: Users },
-    { id: 'assignments', label: 'Assignments', icon: BookOpen, badge: 10 },
+    { id: 'assignments', label: 'Assignments', icon: BookOpen, badge: assignmentsCount > 0 ? assignmentsCount : undefined },
     { id: 'toolkit', label: 'AI Teacher\'s Toolkit', icon: Sparkles },
     { id: 'library', label: 'My Library', icon: Library },
   ];

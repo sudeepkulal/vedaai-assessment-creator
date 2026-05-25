@@ -100,7 +100,7 @@ const mockAssignments: Assignment[] = [
 ];
 
 const initialState: AssignmentsState = {
-  items: mockAssignments,
+  items: [],
   searchQuery: '',
   filterBy: 'All',
   activeTab: 'assignments',

@@ -103,17 +103,40 @@ export default function AssignmentsPage() {
         <div className="flex-1 overflow-y-auto relative pb-10">
           {filteredAssignments.length === 0 ? (
             /* Empty State matching Image 2 & 5 */
-            <div className="flex flex-col items-center justify-center py-12 md:py-16 text-center select-none animate-in fade-in duration-300">
-              {/* Custom SVG Illustration for Empty View */}
-              <div className="relative w-48 h-48 md:w-56 md:h-56 bg-gray-50/30 rounded-full flex items-center justify-center mb-6 border border-gray-100/30">
-                <div className="w-36 h-36 rounded-full bg-slate-50 flex items-center justify-center shadow-inner relative border border-gray-100/70">
-                  <FileText className="w-16 h-16 text-slate-400" />
-                  <div className="absolute top-8 right-8 w-12 h-12 bg-white rounded-full border border-gray-100 shadow-md flex items-center justify-center ring-4 ring-slate-50/40">
-                    <span className="text-2xl font-bold text-red-500">✕</span>
-                  </div>
-                  <span className="absolute bottom-6 left-6 text-xl animate-bounce">✨</span>
-                </div>
-              </div>
+            <div className="flex flex-col items-center justify-center py-6 md:py-12 text-center select-none animate-in fade-in duration-300">
+              {/* High-Fidelity Custom Figma SVG Illustration */}
+              <svg width="240" height="240" viewBox="0 0 240 240" fill="none" xmlns="http://www.w3.org/2000/svg" className="mb-6 drop-shadow-md">
+                {/* Background Shadow Circle */}
+                <circle cx="120" cy="120" r="86" fill="#E5E7EB" fillOpacity="0.5"/>
+                
+                {/* Squiggle Curl (Upper Left) */}
+                <path d="M 68 85 C 65 72, 78 52, 90 62 C 100 70, 75 92, 60 90" stroke="#1E293B" strokeWidth="2.5" fill="none" strokeLinecap="round"/>
+                
+                {/* 4-Point Sparkle Star (Lower Left) */}
+                <path d="M 82 154 Q 87 154 87 149 Q 87 154 92 154 Q 87 154 87 159 Q 87 154 82 154 Z" fill="#0EA5E9"/>
+                
+                {/* Right side accent blue dot */}
+                <circle cx="178" cy="124" r="5.5" fill="#2563EB"/>
+                
+                {/* Document Card Sheet */}
+                <rect x="94" y="66" width="68" height="88" rx="8" fill="white" stroke="#E5E7EB" strokeWidth="2"/>
+                {/* Document lines */}
+                <rect x="106" y="80" width="22" height="5" rx="2" fill="#1E293B"/>
+                <rect x="106" y="93" width="44" height="3" rx="1.5" fill="#9CA3AF" fillOpacity="0.5"/>
+                <rect x="106" y="101" width="44" height="3" rx="1.5" fill="#9CA3AF" fillOpacity="0.5"/>
+                <rect x="106" y="109" width="44" height="3" rx="1.5" fill="#9CA3AF" fillOpacity="0.5"/>
+                <rect x="106" y="117" width="28" height="3" rx="1.5" fill="#9CA3AF" fillOpacity="0.5"/>
+                
+                {/* Magnifying Glass with red X */}
+                {/* Handle */}
+                <line x1="146" y1="146" x2="178" y2="178" stroke="#D1D5DB" strokeWidth="11" strokeLinecap="round"/>
+                <line x1="146" y1="146" x2="178" y2="178" stroke="#9CA3AF" strokeWidth="5.5" strokeLinecap="round"/>
+                {/* Ring frame */}
+                <circle cx="128" cy="128" r="26" fill="#F9FAFB" stroke="#D1D5DB" strokeWidth="7"/>
+                {/* Red cross marks */}
+                <line x1="119" y1="119" x2="137" y2="137" stroke="#EF4444" strokeWidth="5" strokeLinecap="round"/>
+                <line x1="137" y1="119" x2="119" y2="137" stroke="#EF4444" strokeWidth="5" strokeLinecap="round"/>
+              </svg>
               <h2 className="text-xl md:text-2xl font-black text-slate-800 tracking-tight leading-tight select-none">No assignments yet</h2>
               <p className="text-gray-500 font-medium text-xs md:text-sm max-w-[420px] select-none mt-2 px-4 leading-relaxed">
                 Create your first assignment to start collecting and grading student submissions. You can set up rubrics, define marking criteria, and let AI assist with grading.
