@@ -6,13 +6,9 @@ import { useAppSelector } from '@/hooks/redux';
 import Header from '@/components/header';
 import { 
   ArrowLeft, 
-  Calendar, 
   Printer, 
   Eye, 
   GraduationCap, 
-  Check, 
-  Award,
-  AlertCircle,
   FileText
 } from 'lucide-react';
 
@@ -28,6 +24,7 @@ export default function AssignmentDetailPage() {
 
   // Toggle state: 'teacher' (reveals answers and rubrics) vs 'student' (hides keys for student/print view)
   const [viewMode, setViewMode] = useState<'teacher' | 'student'>('teacher');
+  const [isDownloadingPDF, setIsDownloadingPDF] = useState(false);
 
   if (!assignment) {
     return (
@@ -86,6 +83,69 @@ export default function AssignmentDetailPage() {
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleDownloadPDF = async () => {
+    setIsDownloadingPDF(true);
+    try {
+      // Dynamic imports to prevent SSR compiler issues in Next.js
+      const html2canvas = (await import('html2canvas')).default;
+      const jsPDF = (await import('jspdf')).jsPDF;
+
+      const element = document.getElementById('exam-paper-sheet');
+      if (!element) return;
+
+      // Save original styles temporarily
+      const originalBorderRadius = element.style.borderRadius;
+      const originalShadow = element.style.boxShadow;
+      const originalBorder = element.style.border;
+
+      // Force standardized sharp borders for PDF canvas capture
+      element.style.borderRadius = '0px';
+      element.style.boxShadow = 'none';
+      element.style.border = 'none';
+
+      // Capture at double scale for crystal clear, high-resolution text
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        logging: false,
+        backgroundColor: '#ffffff',
+      });
+
+      // Restore original container styles for browser display
+      element.style.borderRadius = originalBorderRadius;
+      element.style.boxShadow = originalShadow;
+      element.style.border = originalBorder;
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      
+      const imgWidth = 210; // A4 width in mm
+      const pageHeight = 297; // A4 height in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      let heightLeft = imgHeight;
+      let position = 0;
+
+      // Add Page 1
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      // Loop and split sections beautifully across new pages
+      while (heightLeft > 0) {
+        position = heightLeft - imgHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      const filename = `${assignment.title.toLowerCase().replace(/[^a-z0-9]/g, '_')}_assessment.pdf`;
+      pdf.save(filename);
+    } catch (error) {
+      console.error('[PDF Generation Error]: Failed to create document:', error);
+    } finally {
+      setIsDownloadingPDF(false);
+    }
   };
 
   return (
@@ -193,13 +253,23 @@ export default function AssignmentDetailPage() {
               </button>
             </div>
 
+            {/* Export PDF Button */}
+            <button
+              onClick={handleDownloadPDF}
+              disabled={isDownloadingPDF}
+              className="px-4.5 py-2.5 rounded-full bg-[#FF4F18] hover:bg-orange-600 disabled:bg-orange-400 text-white text-xs font-bold tracking-wider flex items-center gap-1.5 shadow-md hover:shadow-lg transition-all cursor-pointer"
+            >
+              <FileText className="w-4 h-4" />
+              <span>Download PDF</span>
+            </button>
+
             {/* Print Action */}
             <button
               onClick={handlePrint}
               className="px-4.5 py-2.5 rounded-full border border-gray-200 hover:border-gray-300 bg-white hover:bg-gray-50 text-slate-700 text-xs font-bold tracking-wider flex items-center gap-1.5 shadow-sm transition-all cursor-pointer"
             >
-              <Printer className="w-4 h-4 text-orange-500" />
-              <span>Print / PDF</span>
+              <Printer className="w-4 h-4 text-slate-500" />
+              <span>Print Paper</span>
             </button>
           </div>
         </div>
@@ -230,8 +300,10 @@ export default function AssignmentDetailPage() {
             </div>
           ) : (
             /* Actual Printable Exam Page Paper */
-            <div className="bg-white border border-gray-100 shadow-sm rounded-3xl p-6 md:p-10 flex flex-col gap-8 max-w-4xl mx-auto w-full select-text print-paper-sheet">
-              
+            <div 
+              id="exam-paper-sheet"
+              className="bg-white border border-gray-100 shadow-sm rounded-3xl p-6 md:p-10 flex flex-col gap-8 max-w-4xl mx-auto w-full select-text print-paper-sheet"
+            >
               {/* Official Academic Paper Header */}
               <div className="flex flex-col items-center text-center pb-6 border-b-2 border-slate-800/80 gap-3 select-none print-header-divider">
                 <span className="text-xs font-black tracking-widest text-slate-400 uppercase">OFFICIAL EVALUATION SHEET</span>
@@ -418,6 +490,22 @@ export default function AssignmentDetailPage() {
         {/* Floating gradient fading overlay */}
         <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-white to-transparent pointer-events-none z-10 no-print"></div>
       </div>
+
+      {/* Floating Glassmorphic PDF Download Progress Loader */}
+      {isDownloadingPDF && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex flex-col items-center justify-center z-50 animate-in fade-in duration-300">
+          <div className="bg-white p-8 rounded-[32px] border border-gray-100 shadow-2xl flex flex-col items-center gap-4 max-w-xs text-center select-none animate-in scale-in duration-200">
+            <div className="relative w-16 h-16 bg-orange-50 rounded-full flex items-center justify-center">
+              <span className="text-2xl animate-bounce">📄</span>
+              <span className="absolute inset-0 rounded-full border-4 border-orange-500 border-t-transparent animate-spin"></span>
+            </div>
+            <h3 className="text-lg font-black text-slate-800 tracking-tight leading-none mt-2">Exporting PDF</h3>
+            <p className="text-xs text-gray-500 font-semibold leading-relaxed px-2">
+              VedaAI is rendering high-resolution exam sheets, structuring question pages, and formatting font layout. Almost ready.
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
