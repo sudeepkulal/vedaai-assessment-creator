@@ -196,17 +196,18 @@ export default function AssignmentsPage() {
                   </div>
 
                   {/* Card Details bar */}
-                  <div className="flex flex-wrap items-center justify-between text-xs font-bold text-slate-800 tracking-wide mt-4 border-t border-gray-50/70 pt-4 gap-2 select-none">
-                    <div className="flex items-center gap-1.5 text-[#1E1E1E]">
-                      <Calendar className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-                      <span className="font-normal text-gray-500">Assigned on:</span>
+                  <div className="flex flex-wrap items-center justify-between text-xs font-bold text-[#1E1E1E] tracking-wide mt-4 border-t border-gray-50/70 pt-4 gap-2 select-none">
+                    <div className="flex items-center gap-1">
+                      <span className="font-normal text-gray-500">Assigned on :</span>
                       <span>{assignment.assignedOn}</span>
                     </div>
 
-                    <div className="flex items-center gap-1.5 text-[#1E1E1E]">
-                      <span className="font-normal text-gray-500">Due:</span>
-                      <span>{assignment.dueDate}</span>
-                    </div>
+                    {assignment.dueDate && (
+                      <div className="flex items-center gap-1">
+                        <span className="font-normal text-gray-500">Due :</span>
+                        <span>{assignment.dueDate}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
