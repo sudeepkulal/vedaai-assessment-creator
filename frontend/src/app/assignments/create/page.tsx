@@ -390,10 +390,17 @@ export default function CreateAssignmentPage() {
                       min="1"
                       placeholder="e.g. 5"
                       {...register(`configs.${index}.count` as const, { valueAsNumber: true })}
-                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-semibold text-slate-700 focus:outline-none focus:border-gray-300"
+                      className={`w-full px-4 py-2.5 rounded-xl border text-xs font-semibold focus:outline-none transition-all ${
+                        errors.configs?.[index]?.count 
+                          ? 'border-red-400 focus:border-red-400 bg-red-50/10' 
+                          : 'border-gray-200 focus:border-gray-300'
+                      }`}
                     />
                     {errors.configs?.[index]?.count && (
-                      <span className="text-red-500 text-[10px] font-bold">{errors.configs[index]?.count?.message}</span>
+                      <span className="text-red-500 text-[10px] font-bold mt-1 flex items-center gap-1.5 animate-in fade-in slide-in-from-top-1">
+                        <AlertCircle className="w-3.5 h-3.5" />
+                        <span>{errors.configs[index]?.count?.message}</span>
+                      </span>
                     )}
                   </div>
 
@@ -406,10 +413,17 @@ export default function CreateAssignmentPage() {
                         min="1"
                         placeholder="e.g. 2"
                         {...register(`configs.${index}.marks` as const, { valueAsNumber: true })}
-                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-semibold text-slate-700 focus:outline-none focus:border-gray-300"
+                        className={`w-full px-4 py-2.5 rounded-xl border text-xs font-semibold focus:outline-none transition-all ${
+                          errors.configs?.[index]?.marks 
+                            ? 'border-red-400 focus:border-red-400 bg-red-50/10' 
+                            : 'border-gray-200 focus:border-gray-300'
+                        }`}
                       />
                       {errors.configs?.[index]?.marks && (
-                        <span className="text-red-500 text-[10px] font-bold">{errors.configs[index]?.marks?.message}</span>
+                        <span className="text-red-500 text-[10px] font-bold mt-1 flex items-center gap-1.5 animate-in fade-in slide-in-from-top-1">
+                          <AlertCircle className="w-3.5 h-3.5" />
+                          <span>{errors.configs[index]?.marks?.message}</span>
+                        </span>
                       )}
                     </div>
 
