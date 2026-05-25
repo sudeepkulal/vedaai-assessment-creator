@@ -1,9 +1,8 @@
 'use client';
 
-import React from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
-import { setActiveTab } from '@/store/slices/assignmentsSlice';
+import { setActiveTab } from '@/redux/slices/assignmentSlice';
 import { 
   Home, 
   Users, 
@@ -16,10 +15,10 @@ import {
 
 export default function Sidebar() {
   const dispatch = useAppDispatch();
-  const activeTab = useAppSelector((state) => state.assignments.activeTab);
+  const activeTab = useAppSelector((state) => state.assignment.activeTab);
   const router = useRouter();
 
-  const assignmentsCount = useAppSelector((state) => state.assignments.items.length);
+  const assignmentsCount = useAppSelector((state) => state.assignment.items.length);
 
   const navItems = [
     { id: 'home', label: 'Home', icon: Home },

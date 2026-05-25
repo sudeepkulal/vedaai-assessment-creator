@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Provider } from 'react-redux';
-import { store } from '@/store';
+import { store } from '@/redux/store';
 import { io, Socket } from 'socket.io-client';
 
 const SocketContext = createContext<Socket | null>(null);

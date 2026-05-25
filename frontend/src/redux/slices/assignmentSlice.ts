@@ -20,12 +20,22 @@ export interface Assignment {
   questions: Question[];
 }
 
-interface AssignmentsState {
+interface AssignmentForm {
+  title: string;
+  topic: string;
+  gradeLevel: string;
+  difficulty: string;
+}
+
+interface AssignmentState {
   items: Assignment[];
+  formData: AssignmentForm;
+  dueDate: string;
+  questionTypes: string[];
+  instructions: string;
   searchQuery: string;
   filterBy: string;
   activeTab: string;
-  selectedAssignment: Assignment | null;
 }
 
 const mockAssignments: Assignment[] = [
@@ -99,16 +109,24 @@ const mockAssignments: Assignment[] = [
   }
 ];
 
-const initialState: AssignmentsState = {
+const initialState: AssignmentState = {
   items: mockAssignments,
+  formData: {
+    title: '',
+    topic: '',
+    gradeLevel: 'Grade 10',
+    difficulty: 'Medium',
+  },
+  dueDate: '2025-06-21',
+  questionTypes: ['multiple-choice', 'short-answer', 'true-false'],
+  instructions: '',
   searchQuery: '',
   filterBy: 'All',
   activeTab: 'assignments',
-  selectedAssignment: null
 };
 
-const assignmentsSlice = createSlice({
-  name: 'assignments',
+const assignmentSlice = createSlice({
+  name: 'assignment',
   initialState,
   reducers: {
     setAssignments(state, action: PayloadAction<Assignment[]>) {
@@ -126,6 +144,18 @@ const assignmentsSlice = createSlice({
         state.items[index] = action.payload;
       }
     },
+    setFormData(state, action: PayloadAction<Partial<AssignmentForm>>) {
+      state.formData = { ...state.formData, ...action.payload };
+    },
+    setDueDate(state, action: PayloadAction<string>) {
+      state.dueDate = action.payload;
+    },
+    setQuestionTypes(state, action: PayloadAction<string[]>) {
+      state.questionTypes = action.payload;
+    },
+    setInstructions(state, action: PayloadAction<string>) {
+      state.instructions = action.payload;
+    },
     setSearchQuery(state, action: PayloadAction<string>) {
       state.searchQuery = action.payload;
     },
@@ -135,10 +165,7 @@ const assignmentsSlice = createSlice({
     setActiveTab(state, action: PayloadAction<string>) {
       state.activeTab = action.payload;
     },
-    setSelectedAssignment(state, action: PayloadAction<Assignment | null>) {
-      state.selectedAssignment = action.payload;
-    }
-  }
+  },
 });
 
 export const {
@@ -146,10 +173,13 @@ export const {
   addAssignment,
   deleteAssignment,
   updateAssignment,
+  setFormData,
+  setDueDate,
+  setQuestionTypes,
+  setInstructions,
   setSearchQuery,
   setFilterBy,
   setActiveTab,
-  setSelectedAssignment
-} = assignmentsSlice.actions;
+} = assignmentSlice.actions;
 
-export default assignmentsSlice.reducer;
+export default assignmentSlice.reducer;

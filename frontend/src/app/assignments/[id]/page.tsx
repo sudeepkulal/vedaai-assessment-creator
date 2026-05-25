@@ -18,7 +18,7 @@ export default function AssignmentDetailPage() {
   const assignmentId = params.id as string;
   
   const assignment = useAppSelector((state) => 
-    state.assignments.items.find(item => item._id === assignmentId)
+    state.assignment.items.find(item => item._id === assignmentId)
   );
 
   if (!assignment) {

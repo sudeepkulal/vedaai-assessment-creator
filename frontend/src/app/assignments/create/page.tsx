@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useAppDispatch } from '@/hooks/redux';
-import { addAssignment, updateAssignment } from '@/store/slices/assignmentsSlice';
+import { addAssignment, updateAssignment } from '@/redux/slices/assignmentSlice';
 import Header from '@/components/header';
 import { 
   Sparkles, 

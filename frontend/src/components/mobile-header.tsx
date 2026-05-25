@@ -3,19 +3,20 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
-import { setActiveTab } from '@/store/slices/assignmentsSlice';
+import { setActiveTab } from '@/redux/slices/assignmentSlice';
 import { Menu, Bell, X, Home, Users, BookOpen, Sparkles, Library, Settings } from 'lucide-react';
 
 export default function MobileHeader() {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const activeTab = useAppSelector((state) => state.assignments.activeTab);
+  const activeTab = useAppSelector((state) => state.assignment.activeTab);
+  const assignmentsCount = useAppSelector((state) => state.assignment.items.length);
   const [isOpen, setIsOpen] = useState(false);
 
   const navItems = [
     { id: 'home', label: 'Home', icon: Home },
     { id: 'groups', label: 'My Groups', icon: Users },
-    { id: 'assignments', label: 'Assignments', icon: BookOpen, badge: 10 },
+    { id: 'assignments', label: 'Assignments', icon: BookOpen, badge: assignmentsCount > 0 ? assignmentsCount : undefined },
     { id: 'toolkit', label: 'AI Teacher\'s Toolkit', icon: Sparkles },
     { id: 'library', label: 'My Library', icon: Library },
     { id: 'settings', label: 'Settings', icon: Settings },

@@ -3,13 +3,13 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
-import { setActiveTab } from '@/store/slices/assignmentsSlice';
+import { setActiveTab } from '@/redux/slices/assignmentSlice';
 import { Home, BookOpen, Library, Sparkles } from 'lucide-react';
 
 export default function BottomNavigation() {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const activeTab = useAppSelector((state) => state.assignments.activeTab);
+  const activeTab = useAppSelector((state) => state.assignment.activeTab);
 
   const items = [
     { id: 'home', label: 'Home', icon: Home },

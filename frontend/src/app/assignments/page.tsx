@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
-import { deleteAssignment, setSearchQuery, setFilterBy } from '@/store/slices/assignmentsSlice';
+import { deleteAssignment, setSearchQuery, setFilterBy } from '@/redux/slices/assignmentSlice';
 import Header from '@/components/header';
 import { 
   Search, 
@@ -19,7 +19,7 @@ import {
 export default function AssignmentsPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const { items: assignments, searchQuery, filterBy } = useAppSelector((state) => state.assignments);
+  const { items: assignments, searchQuery, filterBy } = useAppSelector((state) => state.assignment);
   
   // Track open state of dropdown action menus for each card ID
   const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
