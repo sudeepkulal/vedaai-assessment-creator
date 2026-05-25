@@ -6,11 +6,18 @@ export interface Question {
   options?: string[];
   correctAnswer: string;
   rubric?: string;
+  marks?: number;
+  difficulty?: string;
+  sectionTitle?: string;
+  sectionInstructions?: string;
 }
 
 export interface Assignment {
   _id: string;
   title: string;
+  topic: string;
+  gradeLevel: string;
+  difficulty: string;
   description?: string;
   status: 'draft' | 'generating' | 'completed' | 'failed';
   assignedOn: string;
@@ -18,6 +25,7 @@ export interface Assignment {
   schoolName: string;
   schoolCity: string;
   questions: Question[];
+  instructions?: string;
 }
 
 interface AssignmentForm {
@@ -42,6 +50,9 @@ const mockAssignments: Assignment[] = [
   {
     _id: '1',
     title: 'Quiz on Electricity',
+    topic: 'Electricity',
+    gradeLevel: 'Grade 10',
+    difficulty: 'Medium',
     status: 'completed',
     assignedOn: '20-06-2025',
     dueDate: '21-06-2025',
@@ -53,13 +64,20 @@ const mockAssignments: Assignment[] = [
         type: 'multiple-choice',
         options: ['Ampere', 'Volt', 'Ohm', 'Watt'],
         correctAnswer: 'Ampere',
-        rubric: 'Full marks if correct option selected.'
+        rubric: 'Full marks if correct option selected.',
+        marks: 2,
+        difficulty: 'Medium',
+        sectionTitle: 'Section A: Multiple Choice Questions',
+        sectionInstructions: 'Choose the correct option. Each question carries 2 marks.'
       }
     ]
   },
   {
     _id: '2',
     title: 'Quiz on Electricity',
+    topic: 'Electricity',
+    gradeLevel: 'Grade 10',
+    difficulty: 'Medium',
     status: 'completed',
     assignedOn: '20-06-2025',
     dueDate: '21-06-2025',
@@ -70,6 +88,9 @@ const mockAssignments: Assignment[] = [
   {
     _id: '3',
     title: 'Quiz on Electricity',
+    topic: 'Electricity',
+    gradeLevel: 'Grade 10',
+    difficulty: 'Medium',
     status: 'completed',
     assignedOn: '20-06-2025',
     dueDate: '21-06-2025',
@@ -80,6 +101,9 @@ const mockAssignments: Assignment[] = [
   {
     _id: '4',
     title: 'Quiz on Electricity',
+    topic: 'Electricity',
+    gradeLevel: 'Grade 10',
+    difficulty: 'Medium',
     status: 'completed',
     assignedOn: '20-06-2025',
     dueDate: '21-06-2025',
@@ -90,6 +114,9 @@ const mockAssignments: Assignment[] = [
   {
     _id: '5',
     title: 'Quiz on Electricity',
+    topic: 'Electricity',
+    gradeLevel: 'Grade 10',
+    difficulty: 'Medium',
     status: 'completed',
     assignedOn: '20-06-2025',
     dueDate: '21-06-2025',
@@ -100,6 +127,9 @@ const mockAssignments: Assignment[] = [
   {
     _id: '6',
     title: 'Quiz on Electricity',
+    topic: 'Electricity',
+    gradeLevel: 'Grade 10',
+    difficulty: 'Medium',
     status: 'completed',
     assignedOn: '20-06-2025',
     dueDate: '21-06-2025',

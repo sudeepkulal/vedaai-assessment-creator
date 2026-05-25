@@ -37,6 +37,11 @@ export const initAssignmentWorker = () => {
         // Step 4: Flatten section questions list
         const questionsList: any[] = [];
         paper.sections.forEach((section) => {
+          // Find config for this section's question type to get marks
+          const qType = section.questions[0]?.type;
+          const config = configs.find((c: any) => c.type === qType);
+          const marks = config ? config.marks : 2;
+
           section.questions.forEach((q) => {
             questionsList.push({
               questionText: q.questionText,
@@ -44,6 +49,10 @@ export const initAssignmentWorker = () => {
               options: q.options,
               correctAnswer: q.correctAnswer,
               rubric: q.rubric || `Evaluate answers based on section instructions: ${section.instructions}`,
+              marks: marks,
+              difficulty: difficulty,
+              sectionTitle: section.sectionTitle,
+              sectionInstructions: section.instructions,
             });
           });
         });

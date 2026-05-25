@@ -6,6 +6,10 @@ export interface IQuestion {
   options?: string[];
   correctAnswer: string;
   rubric?: string;
+  marks?: number;
+  difficulty?: string;
+  sectionTitle?: string;
+  sectionInstructions?: string;
 }
 
 export interface IAssignment extends Document {
@@ -29,7 +33,11 @@ const QuestionSchema = new Schema<IQuestion>({
   type: { type: String, enum: ['multiple-choice', 'short-answer', 'true-false'], required: true },
   options: { type: [String], default: undefined },
   correctAnswer: { type: String, required: true },
-  rubric: { type: String }
+  rubric: { type: String },
+  marks: { type: Number },
+  difficulty: { type: String },
+  sectionTitle: { type: String },
+  sectionInstructions: { type: String }
 });
 
 const AssignmentSchema = new Schema<IAssignment>(
