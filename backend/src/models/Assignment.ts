@@ -49,4 +49,7 @@ const AssignmentSchema = new Schema<IAssignment>(
   { timestamps: true }
 );
 
+// Optimize Dashboard Text Searches with Text Indexes
+AssignmentSchema.index({ title: 'text', topic: 'text' });
+
 export default mongoose.model<IAssignment>('Assignment', AssignmentSchema);
