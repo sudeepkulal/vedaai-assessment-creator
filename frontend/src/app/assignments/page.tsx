@@ -114,9 +114,19 @@ export default function AssignmentsPage() {
 
   // Close dropdown on outside click
   useEffect(() => {
-    const handler = () => setActiveDropdownId(null);
+    const handler = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as HTMLElement;
+      if (target && target.closest('.dropdown-container')) {
+        return;
+      }
+      setActiveDropdownId(null);
+    };
     document.addEventListener('click', handler);
-    return () => document.removeEventListener('click', handler);
+    document.addEventListener('touchstart', handler);
+    return () => {
+      document.removeEventListener('click', handler);
+      document.removeEventListener('touchstart', handler);
+    };
   }, []);
 
   return (
@@ -252,7 +262,7 @@ export default function AssignmentsPage() {
                 <div
                   key={assignment._id}
                   onClick={() => handleView(assignment._id)}
-                  className="bg-white border border-gray-200 rounded-[20px] p-5 cursor-pointer relative group flex flex-col justify-between min-h-[120px] active:scale-[0.99] transition-all duration-150 shadow-sm hover:shadow-md select-none"
+                  className="bg-white border border-gray-200 rounded-[20px] p-5 cursor-pointer relative group flex flex-col justify-between min-h-[120px] active:scale-[0.99] transition-all duration-150 shadow-sm hover:shadow-md select-none overflow-visible"
                 >
                   {/* Card Header */}
                   <div className="flex items-start justify-between gap-2">
@@ -260,7 +270,7 @@ export default function AssignmentsPage() {
                       {assignment.title}
                     </h3>
 
-                    <div className="relative shrink-0" onClick={(e) => e.stopPropagation()}>
+                    <div className="relative shrink-0 dropdown-container" onClick={(e) => e.stopPropagation()}>
                       <button
                         onClick={(e) => toggleDropdown(assignment._id, e)}
                         className="p-1.5 rounded-full hover:bg-gray-100 text-gray-400 hover:text-slate-700 transition cursor-pointer"
@@ -269,13 +279,16 @@ export default function AssignmentsPage() {
                       </button>
 
                       {activeDropdownId === assignment._id && (
-                        <div className="absolute right-0 mt-1 w-[168px] bg-white border border-gray-200 rounded-2xl shadow-xl py-1.5 z-30 animate-slide-in-top">
+                        <div className="absolute right-0 mt-1 w-[168px] bg-white border border-gray-200 rounded-2xl shadow-xl py-1.5 z-50 animate-slide-in-top">
                           <button
-                            onClick={() => handleView(assignment._id)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleView(assignment._id);
+                            }}
                             className="w-full px-4 py-2.5 text-slate-700 text-sm font-medium flex items-center gap-2.5 hover:bg-gray-50 cursor-pointer text-left"
                           >
                             <Eye className="w-4 h-4 text-gray-400" />
-                            <span>View Assignment</span>
+                            <span>View</span>
                           </button>
                           <hr className="border-gray-100 my-1" />
                           <button
