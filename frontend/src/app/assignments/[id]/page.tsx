@@ -66,9 +66,15 @@ export default function AssignmentDetailPage() {
 
   if (isFetching) {
     return (
-      <div className="flex-1 flex flex-col gap-6 md:my-4 select-none">
-        <Header breadcrumb="Assignments / Detail" showBack={true} />
-        <div className="flex-1 bg-white md:rounded-[28px] border border-gray-100 p-8 flex flex-col items-center justify-center h-[calc(100vh-130px)]">
+      <div className="flex-1 flex flex-col select-none">
+        <div className="hidden md:block"><Header breadcrumb="Assignments / Detail" showBack={true} /></div>
+        <div className="md:hidden flex items-center gap-3 px-4 py-3">
+          <button onClick={() => router.back()} className="w-9 h-9 rounded-full bg-white border border-gray-200 flex items-center justify-center text-slate-600 shadow-sm cursor-pointer">
+            <ArrowLeft className="w-4 h-4" strokeWidth={2} />
+          </button>
+          <h1 className="flex-1 text-center text-[16px] font-bold text-[#1A1A1A] tracking-tight pr-9">Assignment</h1>
+        </div>
+        <div className="flex flex-col items-center justify-center py-20 text-center">
           <span className="w-10 h-10 border-4 border-orange-400 border-t-transparent rounded-full animate-spin mb-4" />
           <p className="text-sm font-semibold text-slate-600">Loading assignment…</p>
         </div>
@@ -78,19 +84,23 @@ export default function AssignmentDetailPage() {
 
   if (!assignment) {
     return (
-      <div className="flex-1 flex flex-col gap-6 md:my-4 select-none animate-in fade-in duration-200">
-        <Header breadcrumb="Assignments / Detail" showBack={true} />
-        <div className="flex-1 bg-white md:rounded-[28px] border border-gray-100 p-8 flex flex-col items-center justify-center h-[calc(100vh-130px)]">
+      <div className="flex-1 flex flex-col select-none">
+        <div className="hidden md:block"><Header breadcrumb="Assignments / Detail" showBack={true} /></div>
+        <div className="md:hidden flex items-center gap-3 px-4 py-3">
+          <button onClick={() => router.back()} className="w-9 h-9 rounded-full bg-white border border-gray-200 flex items-center justify-center text-slate-600 shadow-sm cursor-pointer">
+            <ArrowLeft className="w-4 h-4" strokeWidth={2} />
+          </button>
+          <h1 className="flex-1 text-center text-[16px] font-bold text-[#1A1A1A] tracking-tight pr-9">Assignment</h1>
+        </div>
+        <div className="flex flex-col items-center justify-center py-16 text-center px-4">
           <span className="text-4xl mb-4">⚠️</span>
-          <h2 className="text-xl font-black text-slate-800 tracking-tight select-none">Assignment Not Found</h2>
-          <p className="text-gray-500 font-medium text-sm select-none mt-2 max-w-sm text-center">
-            {fetchFailed
-              ? 'Could not load this assignment from the server.'
-              : 'The assignment may have been deleted or the link is invalid.'}
+          <h2 className="text-xl font-black text-slate-800 tracking-tight">Assignment Not Found</h2>
+          <p className="text-gray-500 text-sm mt-2 max-w-sm text-center">
+            {fetchFailed ? 'Could not load this assignment from the server.' : 'The assignment may have been deleted or the link is invalid.'}
           </p>
-          <button 
+          <button
             onClick={() => router.push('/assignments')}
-            className="mt-6 px-6 py-2.5 rounded-full bg-[#1E1E1E] text-white hover:bg-neutral-800 text-sm font-semibold tracking-wide cursor-pointer transition"
+            className="mt-6 px-6 py-3 rounded-full bg-[#1A1A1A] text-white text-sm font-semibold cursor-pointer transition active:scale-95"
           >
             Go Back
           </button>
@@ -295,7 +305,7 @@ export default function AssignmentDetailPage() {
   };
 
   return (
-    <div className="flex-1 flex flex-col gap-6 md:my-4 select-none">
+    <div className="flex-1 flex flex-col select-none">
       {/* Custom Styles for Print Overrides */}
       <style dangerouslySetInnerHTML={{__html: `
         @media print {
@@ -427,34 +437,37 @@ export default function AssignmentDetailPage() {
       `}} />
 
       {/* Desktop Header Navigation */}
-      <div className="no-print">
+      <div className="hidden md:block no-print">
         <Header breadcrumb={`Assignments / ${assignment.title}`} showBack={true} />
       </div>
 
-      {/* Main Container Card */}
-      <div className="flex-1 bg-white md:rounded-[28px] border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.015)] p-5 md:p-8 flex flex-col justify-start relative overflow-hidden h-[calc(100vh-160px)] md:h-[calc(100vh-130px)] print-full-width">
-        
-        {/* Detail Action & Toggle Header Block */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-gray-50 shrink-0 no-print">
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={() => router.back()}
-              className="w-10 h-10 rounded-full border border-gray-100 flex items-center justify-center bg-gray-50/50 hover:bg-gray-100 text-slate-700 transition cursor-pointer"
-            >
-              <ArrowLeft className="w-4 h-4" />
-            </button>
-            <div>
-              <h1 className="text-xl md:text-2xl font-black text-slate-800 tracking-tight leading-tight flex items-center gap-2">
-                {assignment.title}
-              </h1>
-              <p className="text-[12px] md:text-sm text-gray-500 font-medium mt-0.5 leading-relaxed truncate max-w-lg">
-                Generated Assessment Sheet
-              </p>
-            </div>
-          </div>
+      {/* Mobile: Back row + page title */}
+      <div className="md:hidden flex items-center gap-3 px-4 py-3 no-print">
+        <button
+          onClick={() => router.back()}
+          className="w-9 h-9 rounded-full bg-white border border-gray-200 flex items-center justify-center text-slate-600 shadow-sm active:scale-95 transition cursor-pointer shrink-0"
+        >
+          <ArrowLeft className="w-4 h-4" strokeWidth={2} />
+        </button>
+        <h1 className="flex-1 text-center text-[16px] font-bold text-[#1A1A1A] tracking-tight pr-9 truncate">
+          {assignment.title}
+        </h1>
+      </div>
 
-          {/* Action Row: Mode Toggles & Print button */}
-          <div className="flex flex-wrap items-center gap-3">
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col md:my-4 print-full-width">
+        
+        {/* Desktop: title block */}
+        <div className="hidden md:flex items-center gap-4 mb-5 no-print">
+          <div>
+            <h1 className="text-2xl font-black text-[#1A1A1A] tracking-tight leading-tight">{assignment.title}</h1>
+            <p className="text-sm text-gray-500 font-medium mt-0.5">Generated Assessment Sheet</p>
+          </div>
+        </div>
+
+        {/* Action Row: Mode Toggles & Print */}
+        <div className="flex flex-wrap items-center gap-2 md:gap-3 mb-4 md:mb-6 px-4 md:px-0 no-print">
+          <div className="flex flex-wrap items-center gap-2 md:gap-3">
             {/* View Mode Segmented Controls */}
             <div className="bg-gray-100/80 border border-gray-200/40 p-1 rounded-full flex items-center shadow-inner">
               <button
@@ -502,8 +515,8 @@ export default function AssignmentDetailPage() {
           </div>
         </div>
 
-        {/* Scrollable Printable exam layout sheet */}
-        <div className="flex-1 overflow-y-auto pt-6 pb-16 px-1 flex flex-col gap-6 print-scroll-container">
+        {/* Exam paper / scrollable content */}
+        <div className="flex-1 px-4 md:px-0 pb-28 md:pb-8 flex flex-col gap-6 print-scroll-container">
           
           {assignment.status === 'generating' ? (
             /* Loader State */
@@ -715,8 +728,6 @@ export default function AssignmentDetailPage() {
 
         </div>
 
-        {/* Floating gradient fading overlay */}
-        <div className="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-white to-transparent pointer-events-none z-10 no-print"></div>
       </div>
 
       {/* Floating Glassmorphic PDF Download Progress Loader */}
