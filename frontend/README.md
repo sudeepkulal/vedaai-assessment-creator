@@ -1,36 +1,59 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# VedaAI Assessment Creator - Frontend 🎨
 
-## Getting Started
+The VedaAI Assessment Creator frontend is built using Next.js (v16 App Router), Redux Toolkit, React Hook Form, Zod schema validation, and Socket.io-client. It matches the original Figma layout designs precisely, featuring high-fidelity printable assessment details page layouts, Teacher/Student toggles, and client-side high-resolution multi-page PDF generation.
 
-First, run the development server:
+---
 
+## 🚀 Setup & Installation
+
+### **Prerequisites**
+Ensure you have **Node.js (v18.0.0 or higher)** installed.
+
+### **1. Install Dependencies**
+From the `/frontend` directory:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### **2. Configure Environment Variables**
+Create a new file named `.env.local` inside this `/frontend` directory:
+```env
+NEXT_PUBLIC_API_URL=http://localhost:5000
+```
+This env key binds your Next.js application to the active backend API server and Socket.io events.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### **3. Start Development Server**
+Launch the Next-Dev compiler:
+```bash
+npm run dev
+```
+Open **`http://localhost:3000`** in your browser to view the application.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## 🛠️ Main Build & Production Commands
 
-To learn more about Next.js, take a look at the following resources:
+*   **Typecheck and Compile**:
+    Validate TypeScript type safety and compile Next.js production builds:
+    ```bash
+    npm run build
+    ```
+*   **Run Production Server**:
+    Launch production bundles locally:
+    ```bash
+    npm start
+    ```
+*   **Lint Check**:
+    Run ESLint validation:
+    ```bash
+    npm run lint
+    ```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 📄 Client-Side PDF Generation Engine
+VedaAI implements a premium client-side PDF export system:
+- **High-Resolution Vector Graphics**: Utilizes double-scale canvas rendering (`scale: 2`) via `html2canvas` to prevent text pixelation.
+- **Pristine Page Boundaries**: Strips screen shadows and rounded card borders dynamically during rendering.
+- **Dynamic Multi-page A4 Distribution**: Employs mathematical height-shifting loops inside `jspdf` to split questions across A4 margins smoothly.
+- **Custom Print Media**: Backup **Print Paper** action formats styles natively using `@media print` directives with standardized `@page` margins, hiding active navigation menus automatically (`no-print`).

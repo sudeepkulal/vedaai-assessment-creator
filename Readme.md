@@ -44,7 +44,7 @@ VedaAI streamlines the examination and homework generation pipeline. Teachers sp
 - **Database Indexer**: MongoDB via Mongoose
 - **Task Queue & Broker**: BullMQ & IORedis
 - **Real-Time Sockets**: Socket.io
-- **AI Synthesis**: Google Generative AI (`gemini-1.5-flash` model for fast, structured JSON generation)
+- **AI Synthesis**: Google Generative AI (`gemini-2.5-flash` model for fast, structured JSON generation)
 
 ---
 
@@ -139,56 +139,65 @@ The frontend uses this URL for REST API calls and Socket.io connections.
 
 ## 🚀 Setup & Installation
 
-Follow these steps to run VedaAI Assessment Creator locally in development mode:
+Follow these absolute local setup and launch instructions to run VedaAI Assessment Creator on your system:
 
 ### **Prerequisites**
 Ensure you have the following installed:
-- Node.js (v18 or higher)
-- MongoDB Server
-- Redis Server
+- **Node.js** (v18.0.0 or higher)
+- **Docker Desktop** (Active and running to spin up database and cache containers)
 
 ---
 
-### **1. Clone and Install Dependencies**
-```bash
-# Clone the repository
-git clone https://github.com/sudeepkulal/vedaai-assessment-creator.git
-cd vedaai-assessment-creator
+### **Step 1: Setup Environment Files (.env)**
+VedaAI is configured to read environment configurations dynamically. Open a terminal inside your repository root folder and run:
 
-# Install Frontend dependencies
+```powershell
+# Copy the backend template to active local env
+Copy-Item backend/.env.example backend/.env
+
+# Copy the frontend template to active local env
+Copy-Item frontend/.env.example frontend/.env.local
+```
+
+> **Offline Mode Active**: Your local `backend/.env` is pre-configured with `GEMINI_API_KEY=MOCK_KEY`. This lets you run the entire WebSocket, BullMQ background queue, and PDF download pipeline fully offline on your laptop with highly realistic mock questions without needing an active internet connection or Gemini subscription! If you want to use the real AI, simply replace `MOCK_KEY` with your active Gemini API key.
+
+---
+
+### **Step 2: Spin Up Infrastructure (MongoDB & Redis via Docker)**
+VedaAI uses **Docker Compose** to run both the database (MongoDB) and task broker (Redis) in fully isolated Linux containers.
+
+1. Make sure **Docker Desktop** is open and active (verify that the engine icon in the bottom-left is green/Running).
+2. Open a terminal inside your repository root folder and start the services:
+```bash
+docker compose up -d
+```
+This single command spins up:
+- **`mongodb-vedaai`**: MongoDB running on default port `27017` with persistent volume storage (`mongo_data`).
+- **`redis-vedaai`**: Redis running on default port `6379` backed by the lightweight Alpine image.
+
+*(To stop both database services later, simply run `docker compose down` in your root folder).*
+
+---
+
+### **Step 3: Launch the Backend Server**
+Open a new terminal window, navigate to the `/backend` folder, install dependencies, and launch the API server and BullMQ background worker:
+```bash
+cd backend
+npm install
+npm run dev
+```
+👉 Look for: `[VedaAI] Server is actively running on port 5000` and `Assignment BullMQ Worker initialized`.
+
+---
+
+### **Step 4: Launch the Frontend Portal**
+Open a separate terminal window, navigate to the `/frontend` folder, install dependencies, and launch the Next.js App Router:
+```bash
 cd frontend
 npm install
-
-# Install Backend dependencies
-cd ../backend
-npm install
-```
-
-### **2. Start Database and Caches**
-Ensure MongoDB and Redis are actively running:
-```bash
-# Verify MongoDB is running (Default port 27017)
-mongod
-
-# Verify Redis is running (Default port 6379)
-redis-server
-```
-
-### **3. Launch Servers**
-
-#### **Backend Server**
-Inside the `/backend` directory:
-```bash
 npm run dev
 ```
-The server will output: `[VedaAI] Server is actively running on port 5000` and `Assignment BullMQ Worker initialized`.
-
-#### **Frontend Server**
-Inside the `/frontend` directory:
-```bash
-npm run dev
-```
-The Next.js portal is accessible at: `http://localhost:3000`.
+👉 Look for: `Local: http://localhost:3000` and `✓ Ready`. Open your browser and navigate to **`http://localhost:3000`** to view and test all features!
 
 ---
 
