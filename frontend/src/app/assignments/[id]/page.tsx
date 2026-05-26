@@ -1,8 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { useAppSelector } from '@/hooks/redux';
+import { useAppDispatch, useAppSelector } from '@/hooks/redux';
+import { updateAssignment } from '@/redux/slices/assignmentSlice';
+import { fetchAssignmentById } from '@/lib/api';
 import Header from '@/components/header';
 import { 
   ArrowLeft, 
@@ -15,16 +17,64 @@ import {
 export default function AssignmentDetailPage() {
   const router = useRouter();
   const params = useParams();
+  const dispatch = useAppDispatch();
   const assignmentId = params.id as string;
   
-  // Get assignment from Redux
   const assignment = useAppSelector((state) => 
-    state.assignment.items.find(item => item._id === assignmentId)
+    state.assignment.items.find(item => String(item._id) === assignmentId)
   );
+
+  const [isFetching, setIsFetching] = useState(!assignment);
+  const [fetchFailed, setFetchFailed] = useState(false);
+
+  useEffect(() => {
+    if (assignment) {
+      setIsFetching(false);
+      return;
+    }
+
+    let cancelled = false;
+
+    async function load() {
+      setIsFetching(true);
+      setFetchFailed(false);
+      try {
+        const data = await fetchAssignmentById(assignmentId);
+        if (!cancelled) {
+          dispatch(updateAssignment(data));
+        }
+      } catch {
+        if (!cancelled) {
+          setFetchFailed(true);
+        }
+      } finally {
+        if (!cancelled) {
+          setIsFetching(false);
+        }
+      }
+    }
+
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [assignmentId, assignment, dispatch]);
 
   // Toggle state: 'teacher' (reveals answers and rubrics) vs 'student' (hides keys for student/print view)
   const [viewMode, setViewMode] = useState<'teacher' | 'student'>('teacher');
   const [isDownloadingPDF, setIsDownloadingPDF] = useState(false);
+
+  if (isFetching) {
+    return (
+      <div className="flex-1 flex flex-col gap-6 md:my-4 select-none">
+        <Header breadcrumb="Assignments / Detail" showBack={true} />
+        <div className="flex-1 bg-white md:rounded-[28px] border border-gray-100 p-8 flex flex-col items-center justify-center h-[calc(100vh-130px)]">
+          <span className="w-10 h-10 border-4 border-orange-400 border-t-transparent rounded-full animate-spin mb-4" />
+          <p className="text-sm font-semibold text-slate-600">Loading assignment…</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!assignment) {
     return (
@@ -34,7 +84,9 @@ export default function AssignmentDetailPage() {
           <span className="text-4xl mb-4">⚠️</span>
           <h2 className="text-xl font-black text-slate-800 tracking-tight select-none">Assignment Not Found</h2>
           <p className="text-gray-500 font-medium text-sm select-none mt-2 max-w-sm text-center">
-            The assignment may have been deleted or the link is invalid.
+            {fetchFailed
+              ? 'Could not load this assignment from the server.'
+              : 'The assignment may have been deleted or the link is invalid.'}
           </p>
           <button 
             onClick={() => router.push('/assignments')}

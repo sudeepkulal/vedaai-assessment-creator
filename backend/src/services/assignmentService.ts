@@ -46,6 +46,7 @@ export class AssignmentService {
       gradeLevel,
       difficulty,
       configs,
+      instructions,
     });
 
     return assignment;

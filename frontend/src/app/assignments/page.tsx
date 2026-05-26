@@ -3,9 +3,10 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/hooks/redux';
-import { deleteAssignment, setSearchQuery, setFilterBy, updateAssignment } from '@/redux/slices/assignmentSlice';
+import { deleteAssignment, setAssignments, setSearchQuery, setFilterBy, updateAssignment } from '@/redux/slices/assignmentSlice';
 import { setProgress } from '@/redux/slices/socketSlice';
 import { useSocket } from '@/app/providers';
+import { fetchAssignments, deleteAssignmentById, normalizeAssignment } from '@/lib/api';
 import Header from '@/components/header';
 import { 
   Search, 
@@ -29,6 +30,41 @@ export default function AssignmentsPage() {
   
   // Track open state of dropdown action menus for each card ID
   const [activeDropdownId, setActiveDropdownId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  // Load assignments from API on mount
+  useEffect(() => {
+    let cancelled = false;
+
+    async function load() {
+      setIsLoading(true);
+      setLoadError(null);
+      try {
+        const list = await fetchAssignments();
+        if (!cancelled) {
+          dispatch(setAssignments(list));
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setLoadError(
+            err instanceof Error
+              ? err.message
+              : 'Failed to load assignments. Is the backend running?'
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [dispatch]);
 
   // Dynamic Socket.io room joins & progress listeners
   useEffect(() => {
@@ -36,7 +72,7 @@ export default function AssignmentsPage() {
 
     const generating = assignments.filter(item => item.status === 'generating');
     generating.forEach((assignment) => {
-      socket.emit('join-assignment', assignment._id);
+      socket.emit('join-assignment', String(assignment._id));
       console.log(`[Socket] Joined assignment room: ${assignment._id}`);
     });
 
@@ -50,10 +86,10 @@ export default function AssignmentsPage() {
       dispatch(setProgress(data.progress));
     });
 
-    socket.on('generation-completed', (data: { assignment: any, assignmentId: string }) => {
+    socket.on('generation-completed', (data: { assignment: Record<string, unknown>, assignmentId: string }) => {
       console.log(`[Socket] Generation completed successfully: ${data.assignmentId}`);
       dispatch(setProgress(100));
-      dispatch(updateAssignment(data.assignment));
+      dispatch(updateAssignment(normalizeAssignment(data.assignment)));
     });
 
     socket.on('generation-failed', (data: { error: string, assignmentId: string }) => {
@@ -93,9 +129,19 @@ export default function AssignmentsPage() {
     router.push(`/assignments/${id}`);
   };
 
-  const handleDelete = (id: string, e: React.MouseEvent) => {
+  const handleDelete = async (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    dispatch(deleteAssignment(id));
+    try {
+      await deleteAssignmentById(id);
+      dispatch(deleteAssignment(id));
+    } catch (err) {
+      console.error('Delete failed:', err);
+      alert(
+        err instanceof Error
+          ? err.message
+          : 'Failed to delete assignment.'
+      );
+    }
     setActiveDropdownId(null);
   };
 
@@ -150,7 +196,19 @@ export default function AssignmentsPage() {
 
         {/* Content Area */}
         <div className="flex-1 overflow-y-auto relative pb-10">
-          {filteredAssignments.length === 0 ? (
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <span className="w-10 h-10 border-4 border-orange-400 border-t-transparent rounded-full animate-spin mb-4" />
+              <p className="text-sm font-semibold text-slate-600">Loading assignments…</p>
+            </div>
+          ) : loadError ? (
+            <div className="flex flex-col items-center justify-center py-12 text-center px-4">
+              <AlertCircle className="w-10 h-10 text-red-500 mb-3" />
+              <h2 className="text-lg font-black text-slate-800">Could not load assignments</h2>
+              <p className="text-gray-500 text-sm mt-2 max-w-md">{loadError}</p>
+              <p className="text-gray-400 text-xs mt-2">Start the backend with MongoDB and Redis, then refresh.</p>
+            </div>
+          ) : filteredAssignments.length === 0 ? (
             /* Empty State matching Image 2 & 5 */
             <div className="flex flex-col items-center justify-center py-6 md:py-12 text-center select-none animate-in fade-in duration-300">
               {/* High-Fidelity Custom Figma SVG Illustration */}

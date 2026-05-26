@@ -46,101 +46,8 @@ interface AssignmentState {
   activeTab: string;
 }
 
-const mockAssignments: Assignment[] = [
-  {
-    _id: '1',
-    title: 'Quiz on Electricity',
-    topic: 'Electricity',
-    gradeLevel: 'Grade 10',
-    difficulty: 'Medium',
-    status: 'completed',
-    assignedOn: '20-06-2025',
-    dueDate: '21-06-2025',
-    schoolName: 'Delhi Public School',
-    schoolCity: 'Bokaro Steel City',
-    questions: [
-      {
-        questionText: 'What is the SI unit of electric current?',
-        type: 'multiple-choice',
-        options: ['Ampere', 'Volt', 'Ohm', 'Watt'],
-        correctAnswer: 'Ampere',
-        rubric: 'Full marks if correct option selected.',
-        marks: 2,
-        difficulty: 'Medium',
-        sectionTitle: 'Section A: Multiple Choice Questions',
-        sectionInstructions: 'Choose the correct option. Each question carries 2 marks.'
-      }
-    ]
-  },
-  {
-    _id: '2',
-    title: 'Quiz on Electricity',
-    topic: 'Electricity',
-    gradeLevel: 'Grade 10',
-    difficulty: 'Medium',
-    status: 'completed',
-    assignedOn: '20-06-2025',
-    dueDate: '21-06-2025',
-    schoolName: 'Delhi Public School',
-    schoolCity: 'Bokaro Steel City',
-    questions: []
-  },
-  {
-    _id: '3',
-    title: 'Quiz on Electricity',
-    topic: 'Electricity',
-    gradeLevel: 'Grade 10',
-    difficulty: 'Medium',
-    status: 'completed',
-    assignedOn: '20-06-2025',
-    dueDate: '21-06-2025',
-    schoolName: 'Delhi Public School',
-    schoolCity: 'Bokaro Steel City',
-    questions: []
-  },
-  {
-    _id: '4',
-    title: 'Quiz on Electricity',
-    topic: 'Electricity',
-    gradeLevel: 'Grade 10',
-    difficulty: 'Medium',
-    status: 'completed',
-    assignedOn: '20-06-2025',
-    dueDate: '21-06-2025',
-    schoolName: 'Delhi Public School',
-    schoolCity: 'Bokaro Steel City',
-    questions: []
-  },
-  {
-    _id: '5',
-    title: 'Quiz on Electricity',
-    topic: 'Electricity',
-    gradeLevel: 'Grade 10',
-    difficulty: 'Medium',
-    status: 'completed',
-    assignedOn: '20-06-2025',
-    dueDate: '21-06-2025',
-    schoolName: 'Delhi Public School',
-    schoolCity: 'Bokaro Steel City',
-    questions: []
-  },
-  {
-    _id: '6',
-    title: 'Quiz on Electricity',
-    topic: 'Electricity',
-    gradeLevel: 'Grade 10',
-    difficulty: 'Medium',
-    status: 'completed',
-    assignedOn: '20-06-2025',
-    dueDate: '21-06-2025',
-    schoolName: 'Delhi Public School',
-    schoolCity: 'Bokaro Steel City',
-    questions: []
-  }
-];
-
 const initialState: AssignmentState = {
-  items: mockAssignments,
+  items: [],
   formData: {
     title: '',
     topic: '',
@@ -169,9 +76,12 @@ const assignmentSlice = createSlice({
       state.items = state.items.filter(item => item._id !== action.payload);
     },
     updateAssignment(state, action: PayloadAction<Assignment>) {
-      const index = state.items.findIndex(item => item._id === action.payload._id);
+      const id = String(action.payload._id);
+      const index = state.items.findIndex(item => String(item._id) === id);
       if (index !== -1) {
-        state.items[index] = action.payload;
+        state.items[index] = { ...action.payload, _id: id };
+      } else {
+        state.items.unshift({ ...action.payload, _id: id });
       }
     },
     setFormData(state, action: PayloadAction<Partial<AssignmentForm>>) {

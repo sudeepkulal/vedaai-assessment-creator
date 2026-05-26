@@ -6,7 +6,8 @@ import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { useAppDispatch } from '@/hooks/redux';
-import { addAssignment, updateAssignment } from '@/redux/slices/assignmentSlice';
+import { addAssignment } from '@/redux/slices/assignmentSlice';
+import { createAssignment } from '@/lib/api';
 import Header from '@/components/header';
 import { 
   Sparkles, 
@@ -53,6 +54,7 @@ export default function CreateAssignmentPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
   const [isGenerating, setIsGenerating] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -107,100 +109,32 @@ export default function CreateAssignmentPage() {
     }
   };
 
-  const onSubmit = (data: AssignmentFormValues) => {
+  const onSubmit = async (data: AssignmentFormValues) => {
     setIsGenerating(true);
-    
-    // 1. Create a "generating" status assignment
-    const newId = Math.random().toString(36).substring(2, 9);
-    const formattedAssignedOn = new Date().toLocaleDateString('en-GB').replace(/\//g, '-');
-    const formattedDueDate = new Date(data.dueDate).toLocaleDateString('en-GB').replace(/\//g, '-');
+    setSubmitError(null);
 
-    const tempAssignment = {
-      _id: newId,
-      title: data.title,
-      topic: data.topic,
-      gradeLevel: data.gradeLevel,
-      difficulty: data.difficulty,
-      description: `Generated AI assignment on ${data.topic}. Grade: ${data.gradeLevel}, Difficulty: ${data.difficulty}.`,
-      status: 'generating' as const,
-      assignedOn: formattedAssignedOn,
-      dueDate: formattedDueDate,
-      schoolName: 'Delhi Public School',
-      schoolCity: 'Bokaro Steel City',
-      questions: [],
-    };
-
-    // Dispatch to Redux list
-    dispatch(addAssignment(tempAssignment));
-
-    // Redirect to assignments list immediately so user can see it generating
-    router.push('/assignments');
-
-    // 2. Simulate AI background generation task over Socket/Queue (2.5 seconds)
-    setTimeout(() => {
-      // Build mock questions dynamically based on field configurations
-      const questionsList: any[] = [];
-      data.configs.forEach((config) => {
-        const sectionTitles = {
-          'multiple-choice': 'Section A: Multiple Choice Questions',
-          'short-answer': 'Section B: Short Answer Questions',
-          'true-false': 'Section C: True or False Questions'
-        };
-        const sectionInstructions = {
-          'multiple-choice': `Choose the correct option. Each question carries ${config.marks} marks.`,
-          'short-answer': `Answer in detail. Each question carries ${config.marks} marks.`,
-          'true-false': `Select True or False. Each question carries ${config.marks} marks.`
-        };
-
-        for (let i = 0; i < config.count; i++) {
-          if (config.type === 'multiple-choice') {
-            questionsList.push({
-              questionText: `Which of the following describes the key principle of ${data.topic}? (Part ${i + 1})`,
-              type: 'multiple-choice' as const,
-              options: ['Option A (Correct answer representation)', 'Option B', 'Option C', 'Option D'],
-              correctAnswer: 'Option A (Correct answer representation)',
-              rubric: `Assign full ${config.marks} marks if the correct option is selected.`,
-              marks: config.marks,
-              difficulty: data.difficulty,
-              sectionTitle: sectionTitles['multiple-choice'],
-              sectionInstructions: sectionInstructions['multiple-choice']
-            });
-          } else if (config.type === 'short-answer') {
-            questionsList.push({
-              questionText: `Explain the fundamental concept of ${data.topic} and discuss its practical applications. (Part ${i + 1})`,
-              type: 'short-answer' as const,
-              correctAnswer: 'The response should focus on main theoretical models and active implementation use-cases.',
-              rubric: `Grading scales up to ${config.marks} marks based on the coverage of applications and principles.`,
-              marks: config.marks,
-              difficulty: data.difficulty,
-              sectionTitle: sectionTitles['short-answer'],
-              sectionInstructions: sectionInstructions['short-answer']
-            });
-          } else if (config.type === 'true-false') {
-            questionsList.push({
-              questionText: `Is the core theory of ${data.topic} applicable under standard normal conditions? (Part ${i + 1})`,
-              type: 'true-false' as const,
-              options: ['True', 'False'],
-              correctAnswer: 'True',
-              rubric: `Assign ${config.marks} marks if True is selected.`,
-              marks: config.marks,
-              difficulty: data.difficulty,
-              sectionTitle: sectionTitles['true-false'],
-              sectionInstructions: sectionInstructions['true-false']
-            });
-          }
-        }
+    try {
+      const created = await createAssignment({
+        title: data.title,
+        topic: data.topic,
+        gradeLevel: data.gradeLevel,
+        difficulty: data.difficulty,
+        dueDate: data.dueDate,
+        configs: data.configs,
+        instructions: data.instructions,
       });
 
-      const completedAssignment = {
-        ...tempAssignment,
-        status: 'completed' as const,
-        questions: questionsList,
-      };
-
-      // Dispatch update to Redux store
-      dispatch(updateAssignment(completedAssignment));
-    }, 2500);
+      dispatch(addAssignment(created));
+      router.push('/assignments');
+    } catch (err) {
+      setSubmitError(
+        err instanceof Error
+          ? err.message
+          : 'Failed to create assignment. Is the backend running?'
+      );
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   return (
@@ -509,6 +443,13 @@ export default function CreateAssignmentPage() {
               className="w-full px-5 py-3.5 rounded-2xl border border-gray-100 focus:border-gray-200 text-sm font-medium focus:outline-none bg-gray-50/20 transition-all placeholder:text-gray-400 resize-none"
             />
           </div>
+
+          {submitError && (
+            <div className="flex items-start gap-2 p-4 rounded-2xl bg-red-50 border border-red-100 text-red-700 text-sm font-semibold">
+              <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+              <span>{submitError}</span>
+            </div>
+          )}
 
           {/* Form Actions */}
           <div className="flex items-center gap-4 pt-4 border-t border-gray-50 shrink-0">

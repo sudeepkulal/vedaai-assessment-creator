@@ -129,10 +129,11 @@ GEMINI_API_KEY=your_google_gemini_api_key
 > **Note**: If `GEMINI_API_KEY` is not provided or is left as `MOCK_KEY`, the backend automatically falls back to a high-fidelity mock AI assessment compiler so that the generation pipelines function completely offline.
 
 ### **Frontend (`/frontend/.env.local`)**
-Create `/frontend/.env.local` with:
+Copy `frontend/.env.local.example` to `frontend/.env.local`:
 ```env
 NEXT_PUBLIC_API_URL=http://localhost:5000
 ```
+The frontend uses this URL for REST API calls and Socket.io connections.
 
 ---
 
