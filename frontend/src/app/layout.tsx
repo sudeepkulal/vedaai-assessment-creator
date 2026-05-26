@@ -32,22 +32,32 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={inter.variable}>
-      <body className="bg-[#EBEBEB] text-[#1A1A1A] antialiased min-h-screen flex flex-col md:flex-row overflow-hidden font-sans">
+      {/*
+        Mobile:  body scrolls naturally (no overflow-hidden), flex-col stack
+        Desktop: overflow-hidden locks the viewport, sidebar + content side-by-side
+      */}
+      <body className="bg-[#EBEBEB] text-[#1A1A1A] antialiased font-sans flex flex-col md:flex-row md:h-screen md:overflow-hidden">
         <Providers>
           {/* Desktop Sidebar — hidden on mobile */}
           <Sidebar />
 
-          {/* Main Layout Area — full height col on mobile, adjusted on desktop */}
-          <div className="flex-1 flex flex-col min-h-screen md:min-h-0 md:h-[calc(100vh-32px)] md:my-4 md:mr-4 md:ml-2 overflow-hidden">
-            {/* Mobile Header — only renders on mobile */}
+          {/*
+            Mobile:  a plain flex-col that grows with content (no fixed height, no overflow-hidden)
+            Desktop: fixed height column that holds the scrollable main panel
+          */}
+          <div className="flex-1 flex flex-col md:h-[calc(100vh-32px)] md:my-4 md:mr-4 md:ml-2 md:overflow-hidden">
+            {/* Mobile Header */}
             <MobileHeader />
 
-            {/* Scrollable Content Panel */}
-            <main className="flex-1 flex flex-col overflow-y-auto px-0 md:px-0 pb-0 md:pb-0">
+            {/*
+              Mobile:  grows naturally, padding at bottom so content clears fixed bottom nav
+              Desktop: overflow-y-auto scrolls within the fixed-height card
+            */}
+            <main className="flex-1 flex flex-col pb-28 md:pb-0 md:overflow-y-auto">
               {children}
             </main>
 
-            {/* Mobile Bottom Navigation Bar */}
+            {/* Mobile Bottom Navigation (fixed, so doesn't affect flow) */}
             <BottomNavigation />
           </div>
         </Providers>
