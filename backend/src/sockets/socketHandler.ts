@@ -4,11 +4,22 @@ import { Server as SocketServer, Socket } from 'socket.io';
 let io: SocketServer | null = null;
 
 export const initSocket = (server: HttpServer): SocketServer => {
+  // Mirror the same allowed-origins logic as the HTTP CORS configuration
+  const allowedOrigins = process.env.ALLOWED_ORIGINS
+    ? process.env.ALLOWED_ORIGINS.split(',').map((o) => o.trim())
+    : ['http://localhost:3000'];
+
+  const corsOrigin =
+    process.env.NODE_ENV === 'production'
+      ? allowedOrigins
+      : '*'; // allow all origins in development for easier testing
+
   io = new SocketServer(server, {
     cors: {
-      origin: '*',
-      methods: ['GET', 'POST']
-    }
+      origin: corsOrigin,
+      methods: ['GET', 'POST'],
+      credentials: true,
+    },
   });
 
   io.on('connection', (socket: Socket) => {
