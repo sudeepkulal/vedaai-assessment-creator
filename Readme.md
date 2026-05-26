@@ -1,5 +1,7 @@
 # VedaAI Assessment Creator 🚀
 
+**🔗 Live Demo / Production Link:** [vedaai-assessment-creator-seven.vercel.app](https://vedaai-assessment-creator-seven.vercel.app/)
+
 VedaAI Assessment Creator is a state-of-the-art, production-grade academic assessment creator designed for educational institutions. Powered by Google Gemini AI, it enables teachers to custom-craft highly rigorous, curriculum-aligned student evaluation sheets in seconds, complete with diverse question types, visual difficulty badges, grading rubrics, student/teacher dual views, and pixel-perfect multi-page A4 PDF exporting.
 
 ---

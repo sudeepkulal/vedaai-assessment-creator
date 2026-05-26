@@ -1,5 +1,7 @@
 # VedaAI Assessment Creator - Backend ⚙️
 
+**🔗 Live Demo / Production Link:** [vedaai-assessment-creator-seven.vercel.app](https://vedaai-assessment-creator-seven.vercel.app/)
+
 The VedaAI Assessment Creator backend is a Node/Express REST API and Socket.io server written in TypeScript. It uses MongoDB (Mongoose) for persistence, and BullMQ + Redis for asynchronous background AI assessment generation jobs, streaming progress live to clients.
 
 ---

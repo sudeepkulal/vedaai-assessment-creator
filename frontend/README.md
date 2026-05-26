@@ -1,5 +1,7 @@
 # VedaAI Assessment Creator - Frontend 🎨
 
+**🔗 Live Demo / Production Link:** [vedaai-assessment-creator-seven.vercel.app](https://vedaai-assessment-creator-seven.vercel.app/)
+
 The VedaAI Assessment Creator frontend is built using Next.js (v16 App Router), Redux Toolkit, React Hook Form, Zod schema validation, and Socket.io-client. It matches the original Figma layout designs precisely, featuring high-fidelity printable assessment details page layouts, Teacher/Student toggles, and client-side high-resolution multi-page PDF generation.
 
 ---

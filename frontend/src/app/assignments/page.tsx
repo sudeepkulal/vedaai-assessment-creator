@@ -112,7 +112,7 @@ export default function AssignmentsPage() {
     setActiveDropdownId(null);
   };
 
-  // Close dropdown on outside click
+  // Close dropdown on outside click (optimized for both desktop & mobile touch events)
   useEffect(() => {
     const handler = (e: MouseEvent | TouchEvent) => {
       const target = e.target as HTMLElement;
