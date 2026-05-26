@@ -38,7 +38,7 @@ export default function Sidebar() {
   };
 
   return (
-    <aside className="hidden md:flex flex-col w-[280px] bg-white h-[calc(100vh-32px)] my-4 ml-4 rounded-[28px] border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)] p-6 justify-between shrink-0">
+    <aside className="hidden md:flex flex-col w-[280px] bg-white h-[calc(100vh-32px)] my-4 ml-4 rounded-[28px] border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)] p-6 justify-between shrink-0 no-print">
       {/* Upper Section */}
       <div className="flex flex-col gap-8">
         {/* Logo */}

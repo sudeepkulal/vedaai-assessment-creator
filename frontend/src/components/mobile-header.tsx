@@ -29,7 +29,7 @@ export default function MobileHeader() {
   };
 
   return (
-    <div className="md:hidden flex flex-col w-full px-4 pt-4 shrink-0 select-none z-40">
+    <div className="md:hidden flex flex-col w-full px-4 pt-4 shrink-0 select-none z-40 no-print">
       {/* Mobile Top Bar */}
       <header className="w-full bg-white h-[68px] rounded-[24px] shadow-[0_4px_25px_rgb(0,0,0,0.015)] border border-gray-100/70 flex items-center justify-between px-5">
         {/* Brand Logo */}

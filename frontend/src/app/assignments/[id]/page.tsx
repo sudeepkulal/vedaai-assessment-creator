@@ -163,6 +163,100 @@ export default function AssignmentDetailPage() {
         useCORS: true,
         logging: false,
         backgroundColor: '#ffffff',
+        onclone: (clonedDoc) => {
+          // 1. Force standard hex/rgb color overrides on all Tailwind theme variables
+          const style = clonedDoc.createElement('style');
+          style.innerHTML = `
+            * {
+              --color-slate-50: #f8fafc !important;
+              --color-slate-100: #f1f5f9 !important;
+              --color-slate-200: #e2e8f0 !important;
+              --color-slate-300: #cbd5e1 !important;
+              --color-slate-400: #94a3b8 !important;
+              --color-slate-500: #64748b !important;
+              --color-slate-600: #475569 !important;
+              --color-slate-700: #334155 !important;
+              --color-slate-800: #1e293b !important;
+              --color-slate-900: #0f172a !important;
+              --color-gray-50: #f9fafb !important;
+              --color-gray-100: #f3f4f6 !important;
+              --color-gray-200: #e5e7eb !important;
+              --color-gray-300: #d1d5db !important;
+              --color-gray-400: #9ca3af !important;
+              --color-emerald-50: #ecfdf5 !important;
+              --color-emerald-100: #d1fae5 !important;
+              --color-emerald-200: #a7f3d0 !important;
+              --color-emerald-500: #10b981 !important;
+              --color-emerald-600: #059669 !important;
+              --color-emerald-700: #047857 !important;
+              --color-emerald-900: #064e3b !important;
+              --color-orange-50: #fff7ed !important;
+              --color-orange-100: #ffedd5 !important;
+              --color-orange-500: #f97316 !important;
+              --color-orange-600: #ea580c !important;
+              --color-orange-700: #c2410c !important;
+              --color-red-50: #fef2f2 !important;
+              --color-red-100: #fee2e2 !important;
+              --color-red-700: #b91c1c !important;
+              --color-amber-50: #fffbeb !important;
+              --color-amber-100: #fef3c7 !important;
+              --color-amber-500: #f59e0b !important;
+              --color-amber-700: #b45309 !important;
+              --color-amber-900: #78350f !important;
+            }
+          `;
+          clonedDoc.head.appendChild(style);
+
+          // 2. Traversal fallback to strip any hardcoded oklch/oklab/lab styles on elements
+          const allElements = clonedDoc.getElementsByTagName('*');
+          for (let i = 0; i < allElements.length; i++) {
+            const el = allElements[i] as HTMLElement;
+            if (el && el.style) {
+              const computed = clonedDoc.defaultView?.getComputedStyle(el);
+              if (computed) {
+                const hasUnsupportedColor = (val: string | null | undefined) => {
+                  if (!val) return false;
+                  const v = val.toLowerCase();
+                  return v.includes('oklch') || v.includes('oklab') || v.includes('lab') || v.includes('lch') || v.includes('color-mix') || v.includes('color(');
+                };
+
+                if (hasUnsupportedColor(computed.color)) {
+                  el.style.color = '#1f2937';
+                }
+                if (hasUnsupportedColor(computed.backgroundColor)) {
+                  el.style.backgroundColor = '#ffffff';
+                }
+                if (hasUnsupportedColor(computed.borderColor)) {
+                  el.style.borderColor = '#e5e7eb';
+                }
+                if (hasUnsupportedColor(computed.borderTopColor)) {
+                  el.style.borderTopColor = '#e5e7eb';
+                }
+                if (hasUnsupportedColor(computed.borderBottomColor)) {
+                  el.style.borderBottomColor = '#e5e7eb';
+                }
+                if (hasUnsupportedColor(computed.borderLeftColor)) {
+                  el.style.borderLeftColor = '#e5e7eb';
+                }
+                if (hasUnsupportedColor(computed.borderRightColor)) {
+                  el.style.borderRightColor = '#e5e7eb';
+                }
+                if (hasUnsupportedColor(computed.boxShadow)) {
+                  el.style.boxShadow = 'none';
+                }
+                if (hasUnsupportedColor(computed.backgroundImage)) {
+                  el.style.backgroundImage = 'none';
+                }
+                if (hasUnsupportedColor(computed.stroke)) {
+                  el.style.stroke = '#1f2937';
+                }
+                if (hasUnsupportedColor(computed.fill)) {
+                  el.style.fill = 'currentColor';
+                }
+              }
+            }
+          }
+        }
       });
 
       // Restore original container styles for browser display
@@ -205,6 +299,10 @@ export default function AssignmentDetailPage() {
       {/* Custom Styles for Print Overrides */}
       <style dangerouslySetInnerHTML={{__html: `
         @media print {
+          @page {
+            size: A4;
+            margin: 15mm 20mm;
+          }
           body, html {
             background-color: white !important;
             color: black !important;
@@ -213,6 +311,11 @@ export default function AssignmentDetailPage() {
             width: 100% !important;
             margin: 0 !important;
             padding: 0 !important;
+          }
+          /* Reset parent layout containers to allow normal document page flow */
+          body, html, main, .overflow-hidden, .overflow-y-auto, .h-screen, .h-full {
+            height: auto !important;
+            overflow: visible !important;
           }
           .no-print {
             display: none !important;
@@ -239,6 +342,8 @@ export default function AssignmentDetailPage() {
             background: white !important;
             padding: 0 !important;
             margin: 0 !important;
+            width: 100% !important;
+            max-width: 100% !important;
           }
           .print-page-break-avoid {
             page-break-inside: avoid !important;
@@ -247,7 +352,78 @@ export default function AssignmentDetailPage() {
           .print-header-divider {
             border-bottom: 2px solid black !important;
           }
+          /* Custom Alignment overrides for printing elements beautifully */
+          #exam-paper-sheet .print-student-info {
+            display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: nowrap !important;
+            justify-content: space-between !important;
+            gap: 20px !important;
+            width: 100% !important;
+          }
+          #exam-paper-sheet .print-student-info > div {
+            display: flex !important;
+            align-items: center !important;
+            flex: 1 !important;
+          }
+          #exam-paper-sheet .print-question-header {
+            display: flex !important;
+            flex-direction: row !important;
+            justify-content: space-between !important;
+            align-items: flex-start !important;
+            width: 100% !important;
+            gap: 15px !important;
+          }
+          #exam-paper-sheet .print-options-grid {
+            display: grid !important;
+            grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+            gap: 12px !important;
+            width: 100% !important;
+          }
         }
+
+        /* Bypass html2canvas Tailwind v4 oklch/oklab parsing bugs by forcing standard hex/rgb values in computed styles */
+        #exam-paper-sheet {
+          background-color: #ffffff !important;
+          color: #1e293b !important;
+          border-color: #e5e7eb !important;
+        }
+        #exam-paper-sheet .text-slate-900 { color: #0f172a !important; }
+        #exam-paper-sheet .text-slate-800 { color: #1e293b !important; }
+        #exam-paper-sheet .text-slate-700 { color: #334155 !important; }
+        #exam-paper-sheet .text-slate-600 { color: #475569 !important; }
+        #exam-paper-sheet .text-slate-500 { color: #64748b !important; }
+        #exam-paper-sheet .text-slate-400 { color: #94a3b8 !important; }
+        #exam-paper-sheet .text-orange-600 { color: #ea580c !important; }
+        #exam-paper-sheet .text-orange-700 { color: #c2410c !important; }
+        #exam-paper-sheet .bg-slate-50 { background-color: #f8fafc !important; }
+        #exam-paper-sheet .bg-\[\#F9FAFB\] { background-color: #f9fafb !important; }
+        #exam-paper-sheet .bg-gray-50\/20 { background-color: rgba(249, 250, 251, 0.2) !important; }
+        #exam-paper-sheet .bg-orange-50\/10 { background-color: rgba(255, 247, 237, 0.1) !important; }
+        #exam-paper-sheet .bg-emerald-50 { background-color: #ecfdf5 !important; }
+        #exam-paper-sheet .bg-emerald-50\/50 { background-color: rgba(236, 253, 245, 0.5) !important; }
+        #exam-paper-sheet .bg-emerald-50\/20 { background-color: rgba(236, 253, 245, 0.2) !important; }
+        #exam-paper-sheet .bg-emerald-500 { background-color: #10b981 !important; }
+        #exam-paper-sheet .bg-orange-50 { background-color: #fff7ed !important; }
+        #exam-paper-sheet .bg-red-50 { background-color: #fef2f2 !important; }
+        #exam-paper-sheet .bg-amber-50\/20 { background-color: rgba(254, 243, 199, 0.2) !important; }
+        #exam-paper-sheet .border-gray-100 { border-color: #f3f4f6 !important; }
+        #exam-paper-sheet .border-gray-200\/80 { border-color: rgba(229, 231, 235, 0.8) !important; }
+        #exam-paper-sheet .border-orange-500 { border-color: #f97316 !important; }
+        #exam-paper-sheet .border-emerald-100 { border-color: #d1fae5 !important; }
+        #exam-paper-sheet .border-emerald-200 { border-color: #a7f3d0 !important; }
+        #exam-paper-sheet .border-emerald-600 { border-color: #059669 !important; }
+        #exam-paper-sheet .border-emerald-100\/60 { border-color: rgba(209, 250, 229, 0.6) !important; }
+        #exam-paper-sheet .border-orange-100 { border-color: #ffedd5 !important; }
+        #exam-paper-sheet .border-red-100 { border-color: #fee2e2 !important; }
+        #exam-paper-sheet .border-amber-100\/60 { border-color: rgba(253, 242, 203, 0.6) !important; }
+        #exam-paper-sheet .border-gray-300 { border-color: #d1d5db !important; }
+        #exam-paper-sheet .text-emerald-700 { color: #047857 !important; }
+        #exam-paper-sheet .text-emerald-900 { color: #064e3b !important; }
+        #exam-paper-sheet .text-orange-700 { color: #c2410c !important; }
+        #exam-paper-sheet .text-red-700 { color: #b91c1c !important; }
+        #exam-paper-sheet .text-amber-700 { color: #b45309 !important; }
+        #exam-paper-sheet .text-amber-900 { color: #78350f !important; }
       `}} />
 
       {/* Desktop Header Navigation */}
@@ -379,7 +555,7 @@ export default function AssignmentDetailPage() {
               </div>
 
               {/* Student Info Blank Input Box */}
-              <div className="border border-dashed border-gray-200/80 rounded-2xl p-5 bg-gray-50/20 flex flex-col sm:flex-row gap-5 justify-between text-xs md:text-sm select-none print-page-break-avoid">
+              <div className="border border-dashed border-gray-200/80 rounded-2xl p-5 bg-gray-50/20 flex flex-col sm:flex-row gap-5 justify-between text-xs md:text-sm select-none print-page-break-avoid print-student-info">
                 <div className="flex items-center gap-2.5 flex-1">
                   <span className="font-extrabold text-slate-700 tracking-wide">Student Name:</span>
                   <div className="h-5 border-b-2 border-dashed border-gray-300 flex-1 min-w-[140px]"></div>
@@ -403,7 +579,7 @@ export default function AssignmentDetailPage() {
               {/* Dynamic Assessment Sections */}
               <div className="flex flex-col gap-10">
                 {sections.map((section, sIdx) => (
-                  <div key={sIdx} className="flex flex-col gap-6 print-page-break-avoid">
+                  <div key={sIdx} className="flex flex-col gap-6">
                     
                     {/* Section Header Card */}
                     <div className="border-l-4 border-orange-500 pl-4 py-1.5 select-none bg-orange-50/10 pr-4 rounded-r-xl">
@@ -427,7 +603,7 @@ export default function AssignmentDetailPage() {
                             className="flex flex-col gap-3 relative pb-6 border-b border-gray-100 last:border-0 last:pb-0 print-page-break-avoid"
                           >
                             {/* Question Title Bar with badging */}
-                            <div className="flex items-start justify-between gap-4">
+                            <div className="flex items-start justify-between gap-4 print-question-header">
                               <div className="flex items-start gap-3 flex-1">
                                 <div className="w-6.5 h-6.5 rounded-full bg-slate-900 border border-slate-950 text-[11px] font-black text-white flex items-center justify-center shrink-0 mt-0.5 shadow-sm select-none">
                                   {qIdx + 1}
@@ -459,7 +635,7 @@ export default function AssignmentDetailPage() {
 
                             {/* Options Display (Multiple choice / True False) */}
                             {question.options && question.options.length > 0 && (
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pl-9 pt-1">
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pl-9 pt-1 print-options-grid">
                                 {question.options.map((option, oIdx) => {
                                   const isCorrect = option === question.correctAnswer;
                                   const optionLetter = String.fromCharCode(65 + oIdx); // A, B, C, D

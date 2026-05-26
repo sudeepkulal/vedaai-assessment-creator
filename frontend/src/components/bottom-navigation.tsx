@@ -24,7 +24,7 @@ export default function BottomNavigation() {
   };
 
   return (
-    <div className="md:hidden fixed bottom-6 left-4 right-4 z-40 max-w-lg mx-auto select-none">
+    <div className="md:hidden fixed bottom-6 left-4 right-4 z-40 max-w-lg mx-auto select-none no-print">
       <nav className="w-full bg-[#1E1E1E]/95 backdrop-blur-md h-[68px] rounded-[24px] border border-neutral-800 shadow-[0_12px_30px_rgba(0,0,0,0.3)] flex items-center justify-around px-2">
         {items.map((item) => {
           const Icon = item.icon;

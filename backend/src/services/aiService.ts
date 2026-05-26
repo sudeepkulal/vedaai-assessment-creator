@@ -28,8 +28,8 @@ export class AIService {
   private static getModel() {
     const apiKey = process.env.GEMINI_API_KEY || 'MOCK_KEY';
     const genAI = new GoogleGenerativeAI(apiKey);
-    // Use gemini-1.5-flash as it is extremely fast and optimized for structured text tasks
-    return genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    // Use gemini-2.5-flash as it is extremely fast and optimized for structured text tasks
+    return genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
   }
 
   static async generateQuestions(
