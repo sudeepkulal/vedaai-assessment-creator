@@ -68,13 +68,26 @@ graph TD
     Worker -->|Notify Completed| Server
     Server <-->|Emit Room Progress Events| Client
 ```
+### **Architecture Overview**:
 
-### **Asynchronous Queue Flow**:
-1. **POST Request**: The user submits the Zod-validated creation form. The server creates an assignment in MongoDB with a `generating` status and pushes a generation job onto **BullMQ**.
-2. **WebSockets Join**: The client joins a Socket.io room matching the new assignment ID.
-3. **AI Worker Ingestion**: The background **BullMQ worker** picks up the job, builds structured instructions, and dispatches them to **Gemini**.
-4. **Progress Streaming**: As the worker executes, it emits Socket.io progress events (`generation-started`, `generation-progress`, `generation-completed`) dynamically updated in the Redux store.
-5. **Real-time Transition**: When the worker saves the questions to MongoDB and fires completion, the frontend switches the card loader state seamlessly to the complete exam sheet.
+The application follows an event-driven, decoupled architecture to avoid blocking API requests during AI generation.
+
+### Flow
+1. Teacher submits assignment configuration from the frontend.
+2. Express API creates an assignment record in MongoDB.
+3. A background job is added to BullMQ (Redis).
+4. API instantly returns a `202 Accepted` response.
+5. Worker service processes the job and calls Gemini API.
+6. Progress updates are streamed via Socket.io.
+7. Generated questions are saved in MongoDB.
+8. Teacher downloads PDF generated client-side.
+
+## Why this Architecture?
+- Non-blocking API design
+- Better scalability using background workers
+- Real-time progress updates
+- Improved user experience
+- Reduced backend load with client-side PDF generation
 
 ---
 
