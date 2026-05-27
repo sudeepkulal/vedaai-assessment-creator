@@ -29,6 +29,74 @@ VedaAI streamlines the examination and homework generation pipeline. Teachers sp
 
 ---
 
+## 💎 Advanced Key Features & Interactive Capabilities
+
+Here are the core technical achievements built into VedaAI that guarantee an elite, production-grade, and resilient user experience:
+
+1. **Decoupled Background Task Processing (BullMQ & Redis)**:
+   - Instead of running slow AI API requests synchronously inside the HTTP request loop (which risks server timeouts and thread blocking), generation requests are converted to background jobs.
+   - Leverages **BullMQ** running over an isolated **Redis instance** to orchestrate job retries, concurrency limits (set to `2` concurrent jobs), and resilient failure recovery.
+
+2. **Real-Time Progress Streaming (WebSockets / Socket.io)**:
+   - The Next.js frontend joins a dedicated WebSocket channel for the created assignment.
+   - The background BullMQ worker emits multi-stage progress events (`40%`, `70%`, `100%`) back to the frontend, updating a beautiful glowing status indicator in the UI.
+
+3. **Structured AI Schema Enforcement (Gemini 2.5 Flash)**:
+   - Employs strict JSON formatting directives combined with a robust post-generation validation utility.
+   - The backend checks each question for correct structure, matching options, valid type configurations, and automatically generates high-quality evaluation rubrics.
+
+4. **Resilient Local Mock AI Fallback (100% Offline Active)**:
+   - Features an automated mock generator fallback. If the backend fails to connect to the Gemini API or the API key is not specified, it seamlessly switches to a fallback generator.
+   - This lets developers and interviewers run and test the complete end-to-end WebSocket, BullMQ queue, MongoDB indexer, and PDF download pipeline entirely offline.
+
+5. **Instant Dual-View Layout Controls (Teacher Mode vs. Student Mode)**:
+   - Transform the visual canvas on the fly!
+   - **Teacher Mode** displays correct answers, options, and recommended academic grading rubrics.
+   - **Student Mode** masks all answers, converts short answer zones to write-in lines, and provides a pristine student exam sheet.
+
+6. **Ultra-High-Resolution PDF Compiler (html2canvas & jsPDF)**:
+   - Incorporates client-side PDF synthesis with custom layout patches.
+   - Runs double-resolution canvas rendering (`scale: 2`) to ensure texts are vector-sharp.
+   - Leverages page height ratio shifts to dynamically divide multi-page sheets without clipping questions.
+   - Employs a custom styling engine override that automatically bypasses Tailwind v4 OKLCH color parsing issues to compile a flawless printable design.
+
+7. **Native Web-Print Overrides (@media print)**:
+   - Backup printable sheets utilizing native browser layout configurations.
+   - Uses `@media print` directives with standardized `@page` margins, automatically hides non-essential headers, sidebars, and navigation menus (`no-print`), and forces correct option alignment.
+
+8. **Database-Level Performance Optimizations (MongoDB Text Indexing)**:
+   - Features custom database index definitions. The MongoDB schema indexes both `title` and `topic` fields as standard text indexes.
+   - This ensures live dashboard query searches complete in O(1) time regardless of dataset scaling.
+
+9. **Fully Touch-Responsive 3-Dot Mobile Action Dropdowns**:
+   - Implements beautiful context action dropdowns with options exactly configured to **"View"** and **"Delete"**.
+   - Includes a native touch-outside listener detecting tap events (`touchstart`) and clicks, combined with structural element ancestry checking (`.closest()`) to avoid mobile viewport issues.
+
+---
+
+## 🛠️ Code Map: Architectural & Implementation Reference
+
+Walk the interviewer directly through the codebase using this exact file locator guide:
+
+| Architectural Component | Responsibility | Implementation File Location |
+| :--- | :--- | :--- |
+| **Database Schema** | Defines MongoDB document structures, timestamps, and search indexes | [`backend/src/models/Assignment.ts`](file:///c:/Users/sudee/Coding%20adda/veda%20ai/vedaai-assessment-creator/backend/src/models/Assignment.ts) |
+| **API Endpoints** | Maps REST routes for creating, fetching, and deleting assessments | [`backend/src/routes/assignmentRoutes.ts`](file:///c:/Users/sudee/Coding%20adda/veda%20ai/vedaai-assessment-creator/backend/src/routes/assignmentRoutes.ts) |
+| **Request Controller** | Receives HTTP calls and initiates asynchronous database saves | [`backend/src/controllers/assignmentController.ts`](file:///c:/Users/sudee/Coding%20adda/veda%20ai/vedaai-assessment-creator/backend/src/controllers/assignmentController.ts) |
+| **BullMQ Queue Producer** | Serializes metadata parameters and pushes tasks onto Redis | [`backend/src/queues/assignmentQueue.ts`](file:///c:/Users/sudee/Coding%20adda/veda%20ai/vedaai-assessment-creator/backend/src/queues/assignmentQueue.ts) |
+| **Background AI Worker** | Consumes BullMQ tasks, coordinates socket streaming, and saves results | [`backend/src/workers/assignmentWorker.ts`](file:///c:/Users/sudee/Coding%20adda/veda%20ai/vedaai-assessment-creator/backend/src/workers/assignmentWorker.ts) |
+| **AI Prompt Builder** | Generates Gemini system directives, validates JSON, and provides Mock fallback | [`backend/src/services/aiService.ts`](file:///c:/Users/sudee/Coding%20adda/veda%20ai/vedaai-assessment-creator/backend/src/services/aiService.ts) |
+| **WebSocket Handler** | Initializes Socket.io connection rooms and handles network state | [`backend/src/sockets/socketHandler.ts`](file:///c:/Users/sudee/Coding%20adda/veda%20ai/vedaai-assessment-creator/backend/src/sockets/socketHandler.ts) |
+| **Unified Redux Store** | Centralizes React context providers, stores, and Redux Toolkit configuration | [`frontend/src/redux/store.ts`](file:///c:/Users/sudee/Coding%20adda/veda%20ai/vedaai-assessment-creator/frontend/src/redux/store.ts) |
+| **Assignments State Slice** | Implements Redux actions for loading, adding, and deleting assessments | [`frontend/src/redux/slices/assignmentSlice.ts`](file:///c:/Users/sudee/Coding%20adda/veda%20ai/vedaai-assessment-creator/frontend/src/redux/slices/assignmentSlice.ts) |
+| **WebSocket State Slice** | Manages live numerical generation progress percentages inside React | [`frontend/src/redux/slices/socketSlice.ts`](file:///c:/Users/sudee/Coding%20adda/veda%20ai/vedaai-assessment-creator/frontend/src/redux/slices/socketSlice.ts) |
+| **Zod Creation Schema** | Validates title, topics, difficulty levels, and question row margins | [`frontend/src/app/assignments/create/page.tsx`](file:///c:/Users/sudee/Coding%20adda/veda%20ai/vedaai-assessment-creator/frontend/src/app/assignments/create/page.tsx) |
+| **Dashboard Interactive Grid** | Integrates Search queries, Status tabs, and Touch-outside dropdowns | [`frontend/src/app/assignments/page.tsx`](file:///c:/Users/sudee/Coding%20adda/veda%20ai/vedaai-assessment-creator/frontend/src/app/assignments/page.tsx) |
+| **PDF Compilation Engine** | Drives double-scale canvas renders, page splits, and Tailwind color bypasses | [`frontend/src/app/assignments/[id]/page.tsx`](file:///c:/Users/sudee/Coding%20adda/veda%20ai/vedaai-assessment-creator/frontend/src/app/assignments/%5Bid%5D/page.tsx) (in `handleDownloadPDF`) |
+| **Native CSS Print Media** | Defines page layout overrides and hides headers/sidebars during prints | [`frontend/src/app/assignments/[id]/page.tsx`](file:///c:/Users/sudee/Coding%20adda/veda%20ai/vedaai-assessment-creator/frontend/src/app/assignments/%5Bid%5D/page.tsx) (in CSS `@media print` section) |
+
+---
+
 ## 💻 Tech Stack
 
 ### **Frontend Container**

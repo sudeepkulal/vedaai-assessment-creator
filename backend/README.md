@@ -6,6 +6,53 @@ The VedaAI Assessment Creator backend is a Node/Express REST API and Socket.io s
 
 ---
 
+## 💎 Elite Backend Features & System Design Architecture
+
+1. **Robust Decoupled Job Queue (BullMQ over Redis)**:
+   - Offloads compute-heavy and latency-variable AI synthesis tasks from the main Express HTTP thread.
+   - Pushes serialized parameter inputs into a high-performance **Redis key-value broker** utilizing **BullMQ**.
+   - Background workers pick up tasks with a concurrency rate of `2`, enabling multi-threaded execution scaling.
+
+2. **WebSockets Event Broadcasting (Socket.io Rooms)**:
+   - Eliminates client HTTP polling! When a task begins, clients subscribe to a room named after their assignment ID.
+   - The worker dynamically broadcasts progress events (`generation-started`, `generation-progress` at `40%`/`70%`, and `generation-completed` / `generation-failed`) to keep clients updated in real time.
+
+3. **Google Gemini Generative AI SDK & Schema Enforcement**:
+   - Integrated with the Google Generative AI Node SDK using the active **`gemini-2.5-flash`** model.
+   - Enforces a rigorous JSON schema prompt requiring a strict section/question array structure.
+   - Includes a post-generation validation system (`parseAndValidateResponse`) that strips markdown wrapper blocks, verifies essential properties, and guarantees structure integrity.
+
+4. **Dynamic High-Fidelity Mock AI Fallback Engine (Offline Resilience)**:
+   - Features a fail-safe offline mode. If `GEMINI_API_KEY` is undefined or configured to `MOCK_KEY`, the server warns but boots fully, supplying high-fidelity topic-customized mock evaluations.
+   - This provides developers and recruiters with a 100% offline-ready, self-contained development ecosystem.
+
+5. **Optimized Mongoose Schemas & Database Indexing**:
+   - Standardizes data formats with Mongoose models representing nested `QuestionSchema` models inside parent `AssignmentSchema` collections.
+   - **Text-Search Indexing**: Elevates query performance by indexing `title` and `topic` fields as database-level text search vectors (`AssignmentSchema.index({ title: 'text', topic: 'text' })`).
+
+6. **Decoupled Service Layers**:
+   - Adheres to clean domain-driven architecture separating REST Controller endpoints, DB business service handlers, AI prompts compilation modules, and worker task ingestion components.
+
+---
+
+## 🛠️ Backend Code Map: Implementation Reference
+
+Direct the interviewer to the core backend operations using these file pointers:
+
+| Module / Component | System Responsibility | Implementation File Location |
+| :--- | :--- | :--- |
+| **MongoDB Model & Index** | Defines assignment schemas, nested question types, and database search indexes | [`src/models/Assignment.ts`](file:///c:/Users/sudee/Coding%20adda/veda%20ai/vedaai-assessment-creator/backend/src/models/Assignment.ts) |
+| **Task Queue Producer** | Connects to Redis and serializes and registers background BullMQ jobs | [`src/queues/assignmentQueue.ts`](file:///c:/Users/sudee/Coding%20adda/veda%20ai/vedaai-assessment-creator/backend/src/queues/assignmentQueue.ts) |
+| **Ingestion Worker** | Consumes BullMQ tasks, triggers Socket progress ticks, and commits items to the DB | [`src/workers/assignmentWorker.ts`](file:///c:/Users/sudee/Coding%20adda/veda%20ai/vedaai-assessment-creator/backend/src/workers/assignmentWorker.ts) |
+| **AI Prompt Compiler** | Drives Gemini system instructions, strict JSON parses, and the offline fallback engine | [`src/services/aiService.ts`](file:///c:/Users/sudee/Coding%20adda/veda%20ai/vedaai-assessment-creator/backend/src/services/aiService.ts) |
+| **WebSocket Handler** | Configures Socket.io namespaces, connection sockets, and room channels | [`src/sockets/socketHandler.ts`](file:///c:/Users/sudee/Coding%20adda/veda%20ai/vedaai-assessment-creator/backend/src/sockets/socketHandler.ts) |
+| **Express DB Service** | Encapsulates database search/filter operations and triggers background queues | [`src/services/assignmentService.ts`](file:///c:/Users/sudee/Coding%20adda/veda%20ai/vedaai-assessment-creator/backend/src/services/assignmentService.ts) |
+| **Controller Route Handler** | Processes HTTP request validations and formats JSON API payloads | [`src/controllers/assignmentController.ts`](file:///c:/Users/sudee/Coding%20adda/veda%20ai/vedaai-assessment-creator/backend/src/controllers/assignmentController.ts) |
+| **Router Declarations** | Defines REST paths linking controllers to paths like `/api/assignments` | [`src/routes/assignmentRoutes.ts`](file:///c:/Users/sudee/Coding%20adda/veda%20ai/vedaai-assessment-creator/backend/src/routes/assignmentRoutes.ts) |
+| **Infrastructure Config** | Handles Redis connections, Mongo connections, and app initializations | [`src/config/`](file:///c:/Users/sudee/Coding%20adda/veda%20ai/vedaai-assessment-creator/backend/src/config) |
+
+---
+
 ## 🚀 Setup & Installation
 
 ### **Prerequisites**
